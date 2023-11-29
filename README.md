@@ -10,6 +10,7 @@ planning solution.
 ## Features
 
 - **Horn Clause Inference Engine**: Utilizes a Horn clause logic system, allowing for efficient and logical problem-solving capabilities.
+- **Partial Ordering**: Using tuples (unordered) and lists (ordered), the system represents partial ordering within the plan.
 
 ## Prerequisites
 
