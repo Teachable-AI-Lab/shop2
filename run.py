@@ -11,6 +11,10 @@ def intAdd(*args):
 
 #Domain Description
 Domain = {
+        "axioms": [
+            Axiom(head=('value-equality', '?x', '?y'), 
+                  conditions=[('value', '?x', '?v'), ('value', '?y', '?v'), (lambda x, y: x<y, '?x', '?y')])
+                  ],
         "assign": Operator(head=('assign', '?x', '?y'),
                         conditions=[('value', '?x', '?vx')],
                         effects=[('value', '?y', '?vx')]),

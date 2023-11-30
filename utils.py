@@ -31,12 +31,12 @@ class Axiom:
     def __init__(self, head, conditions=list()):
         self.head = head
         self.name = head[0]
-        self.conditions = conditions
+        self.conditions = set(conditions)
 
     def applicable(self, state):
         index = build_index(state)
         for theta in pattern_match(self.conditions, index):
-            state.add(unify(self.head, theta))
+            state.add(subst(theta, self.head))
         return state
 
     def __str__(self):
@@ -225,6 +225,8 @@ def SHOP2(state: Set, T: Union[List, Tuple], D: Dict) -> Union[List, Tuple, bool
     while True:
         if not T:
             return replaceHead(plan), state 
+        for axiom in D.get('axioms', []):
+            state = axiom.applicable(state)
         T0 = getT0(T)
         task = choice(T0) # non-deterministic choice
         if task.primitive:
