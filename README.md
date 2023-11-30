@@ -14,9 +14,10 @@ planning solution.
 
 ## Prerequisites
 
-- Python version should be 3.8 or higher
-- Install py_plan==1.0 using pip
+- Python version >= 3.8
+- Install python package py_plan==1.0 
 
 ## Commands
-- python run.py
-
+```
+python run.py
+```
