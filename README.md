@@ -19,5 +19,5 @@ planning solution.
 
 ## Commands
 ```
-python run.py
+python rn.py
 ```
