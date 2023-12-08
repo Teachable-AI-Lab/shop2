@@ -32,7 +32,7 @@ def SHOP2(state: Set, T: Union[List, Tuple], D: Dict, debug=False) -> Union[List
                 else:
                     return False
         else:
-            if (result := D[task.name].applicable(task, state, visited, debug=debug)):
+            if (result := D[task.name].applicable(task, state, str(plan), visited, debug=debug)): # NOTE plan is passed as string just because it is more convenient to pass it as string than its original structure
                 stack.append((deepcopy(T), deepcopy(plan), deepcopy(state)))
                 subtask = result
                 plan = replaceTask(plan, task, subtask)

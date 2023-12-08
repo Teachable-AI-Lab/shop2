@@ -63,18 +63,18 @@ class Method:
         self.subtasks = subtasks
         self.cost = cost # TODO cost = sum of costs of operators in subtasks
 
-    def applicable(self, task, state, visited, debug=False):
+    def applicable(self, task, state, plan, visited, debug=False):
         index = build_index(state)
         substitutions = unify(task.head, self.head)
         for condition, subtask in zip(self.conditions, self.subtasks):
-            if (condition, state) in visited:
+            if (condition, state, plan) in visited:
                 continue
             M = [(self.name, theta) for theta in pattern_match(condition, index, substitutions)] # Find if method's precondition is satisfied for state
             if debug:
                 print("Task: {}\nCondition: {}\nState: {}\nSubstitutions: {}\nApplicable  Methods: {}\n\n".format(task.head, condition, state, substitutions, M))
             if M:
                 m, theta = choice(M)
-                visited.append((condition,state))
+                visited.append((condition,state, plan))
                 return msubst(theta, subtask)
         return False
 
