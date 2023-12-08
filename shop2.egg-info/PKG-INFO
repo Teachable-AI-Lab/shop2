@@ -1,3 +1,10 @@
+Metadata-Version: 2.1
+Name: shop2
+Version: 0.1.0.dev6
+Summary: This is the Pythonic implementation of the SHOP2 planner.
+Author: Momin N. Siddiqui
+Requires-Python: >=3.8
+
 # SHOP2 Implementation in Python
 
 ## Overview
@@ -21,3 +28,4 @@ planning solution.
 ```
 python run.py
 ```
+

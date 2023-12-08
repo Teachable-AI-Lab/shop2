@@ -1,13 +1,5 @@
-from utils import Task, Operator, Method, Axiom
-from utils import SHOP2
-
-# Functions for operators for use
-def intMult(*args):
-    return args[0] * args[1]
-
-# Functions for operators for use
-def intAdd(*args):
-    return args[0] + args[1]
+from shop2.domain import Task, Operator, Method, Axiom
+from shop2.planner import SHOP2
 
 #Domain Description
 Domain = {
@@ -21,17 +13,17 @@ Domain = {
 
         "intAdd": Operator(head=('intAdd', '?x', '?y', '?z'),
                         conditions=[('value', '?x', '?vx'), ('value', '?y', '?vy')],
-                        effects=[('value', '?z', (intAdd, '?vx', '?vy'))]),
+                        effects=[('value', '?z', (lambda x,y: x+y, '?vx', '?vy'))]),
 
         "intMult": Operator(head=('intMult', '?x', '?y', '?z'),
                         conditions=[('value', '?x', '?vx'), ('value', '?y', '?vy')],
-                        effects=[('value', '?z', (intMult, '?vx', '?vy'))]),
+                        effects=[('value', '?z', (lambda x,y:x*y, '?vx', '?vy'))]),
 
         "fracAdd": Method(head=('fracAdd', '?xn', '?yn', '?xd', '?yd'),
                           conditions=[{('value', '?xn', '?vnx'), ('value', '?yn', '?vny'), ('value', '?xd', '?vd'), ('value', '?yd', '?vd')},
                                       {('value', '?xn', '?vnx'), ('value', '?yn', '?vny'), ('value', '?xd', '?vxd'), ('value', '?yd', '?vyd')}],
                           subtasks=[[Task(head=('intAdd', 'xn', 'yn', 'nom'), primitive=True), Task(head=('assign', 'xd', 'denom'), primitive=True)],
-                                    ([(Task(head=('intMult', 'xn', 'yd', 'nom1'), primitive=True), Task(head=('intMult', 'yn', 'xd', 'nom2'), primitive=True)), Task(head=('intAdd', 'nom1', 'nom2', 'nom'), primitive=True)],
+                                    ([(Task(head=('intMult', '?xn', '?yd', 'nom1'), primitive=True), Task(head=('intMult', '?yn', '?xd', 'nom2'), primitive=True)), Task(head=('intAdd', 'nom1', 'nom2', 'nom'), primitive=True)],
                                      Task(head=('intMult', 'xd', 'yd', 'denom'), primitive=True))]),
 
         "fracMult": Method(head=('fracMult', '?xn', '?yn', '?xd', '?yd'),
@@ -39,16 +31,18 @@ Domain = {
                             subtasks=[[Task(head=('intMult', 'xn', 'yn', 'nom'), primitive=True), Task(head=('intMult', 'xd', 'yd', 'denom'), primitive=True)]]),
                             
         "add": Method(head=('add',),
-                      conditions=[{('value', '?xn', '?vnx'), ('value', '?yn', '?vny'), ('value', '?xd', '?vdx'), ('value', '?yd', '?vdy')},
-                                  {('value', '?x', '?vx'), ('value', '?y', '?vy')}],
-                      subtasks=[Task(head=('fracAdd', 'xn', 'yn', 'xd', 'yd'), primitive=False),
-                                Task(head=('intAdd', 'x', 'y', 'ans'), primitive=True)]),
+                      conditions=[{('value', '?xn', '?vnx'), ('value', '?yn', '?vny'), ('value', '?xd', '?vdx'), ('value', '?yd', '?vdy'), 
+                                   (lambda xn,yn,xd,yd: xn=='xn' and yn=='yn' and xd=='xd' and yd=='yd', '?xn', '?yn', '?xd', '?yd')},
+                                  {('value', '?x', '?vx'), ('value', '?y', '?vy'), (lambda x,y: x!=y, '?x', '?y')}],
+                      subtasks=[Task(head=('fracAdd', '?xn', '?yn', '?xd', '?yd'), primitive=False),
+                                Task(head=('intAdd', '?x', '?y', 'ans'), primitive=True)]),
 
         "mult": Method(head=('mult',),
-                          conditions=[{('value', '?xn', '?vnx'), ('value', '?yn', '?vny'), ('value', '?xd', '?vdx'), ('value', '?yd', '?vdy')},
-                                      {('value', '?x', '?vx'), ('value', '?y', '?vy')}],
-                          subtasks=[Task(head=('fracMult', 'xn', 'yn', 'xd', 'yd'), primitive=False),
-                                    Task(head=('intMult', 'x', 'y', 'ans'), primitive=True)]),
+                          conditions=[{('value', '?xn', '?vnx'), ('value', '?yn', '?vny'), ('value', '?xd', '?vdx'), ('value', '?yd', '?vdy'),
+                                       (lambda xn,yn,xd,yd: xn=='xn' and yn=='yn' and xd=='xd' and yd=='yd', '?xn', '?yn', '?xd', '?yd')},
+                                      {('value', '?x', '?vx'), ('value', '?y', '?vy'), (lambda x,y: x!=y, '?x', '?y')}],
+                          subtasks=[Task(head=('fracMult', '?xn', '?yn', '?xd', '?yd'), primitive=False),
+                                    Task(head=('intMult', '?x', '?y', 'ans'), primitive=True)]),
                                     
         "solve":  Method(head=('solve',),
                      conditions=[{('operator', '?op', '+')}, {('operator', '?op', '*')}],
@@ -59,7 +53,7 @@ if __name__ == "__main__":
 
     numerator_x, numerator_y = 1, 3
     denominator_x, denominator_y = 6, 5
-    operator = "+"
+    operator = "*"
     state = set([('value', 'xn', numerator_x), ('value', 'yn', numerator_y), ('value', 'xd', denominator_x), ('value', 'yd', denominator_y),('operator', 'op', operator)])
     # state = set([('value', 'xn', numerator_x), ('value', 'yn', numerator_y), ('operator', 'op', operator)])
 
@@ -67,7 +61,8 @@ if __name__ == "__main__":
 
     if result := SHOP2(state, Tasks, Domain): 
         plan, nstate = result
-        print("PLAN:\n{}\n\nOLD STATE:\n{}\n\nNEW STATE:\n{}".format(plan, state, nstate))
+        print(state)
+        print(sorted(nstate.difference(state)))
     else:
         print("No plan found")
 

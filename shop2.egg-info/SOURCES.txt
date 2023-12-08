@@ -1,0 +1,16 @@
+AUTHORS
+ChangeLog
+README.md
+run.py
+setup.cfg
+setup.py
+shop2/domain.py
+shop2/planner.py
+shop2/utils.py
+shop2.egg-info/PKG-INFO
+shop2.egg-info/SOURCES.txt
+shop2.egg-info/dependency_links.txt
+shop2.egg-info/not-zip-safe
+shop2.egg-info/pbr.json
+shop2.egg-info/requires.txt
+shop2.egg-info/top_level.txt
