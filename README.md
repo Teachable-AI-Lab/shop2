@@ -24,7 +24,7 @@ Specify the head which will evaluate as true when the tail (conditions) are true
 from shop2.domain import Axiom
 
 equality = Axiom(head=('value-equality', '?x', '?y'), 
-      conditions=[('value', '?x', '?v'), ('value', '?y', '?v'), (lambda x, y: x<y, '?x', '?y')])
+                 conditions=[('value', '?x', '?v'), ('value', '?y', '?v'), (lambda x, y: x<y, '?x', '?y')])
 ```
 
 ### Operator
@@ -33,8 +33,8 @@ Consists of head, conditions, and effects. Delete effects are discerned by using
 from shop2.domain import Operator
 
 intAdd = Operator(head=('intAdd', '?x', '?y', '?z'),
-                        conditions=[('value', '?x', '?vx'), ('value', '?y', '?vy')],
-                        effects=[('value', '?z', (lambda x,y: x+y, '?vx', '?vy'))]),
+                  conditions=[('value', '?x', '?vx'), ('value', '?y', '?vy')],
+                  effects=[('value', '?z', (lambda x,y: x+y, '?vx', '?vy'))]),
 ```
 
 ### Method
@@ -43,16 +43,16 @@ Consists of head, list of conditions for different subtasks lists, and a list of
 from shop2.domain import Methdo
 
 fracAdd = Method(head=('fracAdd', '?xn', '?yn', '?xd', '?yd'),
-                          conditions=[[('value', '?xn', '?vnx'), ('value', '?yn', '?vny'),
-                                       ('value', '?xd', '?vd'), ('value', '?yd', '?vd')], # 1st subtasks list conds
-                                      [('value', '?xn', '?vnx'), ('value', '?yn', '?vny'),
-                                       ('value', '?xd', '?vxd'), ('value', '?yd', '?vyd')]], # 2nd subtasks list conds
-                          subtasks=[[Task(head=('intAdd', 'xn', 'yn', 'nom'), primitive=True),
-                                     Task(head=('assign', 'xd', 'denom'), primitive=True)], # 1st subtasks list
-                                    ([(Task(head=('intMult', '?xn', '?yd', 'nom1'), primitive=True),
-                                       Task(head=('intMult', '?yn', '?xd', 'nom2'), primitive=True)),
-                                       Task(head=('intAdd', 'nom1', 'nom2', 'nom'), primitive=True)],
-                                       Task(head=('intMult', 'xd', 'yd', 'denom'), primitive=True))]), # 2nd subtasks list
+                 conditions=[[('value', '?xn', '?vnx'), ('value', '?yn', '?vny'),
+                              ('value', '?xd', '?vd'), ('value', '?yd', '?vd')], # 1st subtasks list conds
+                             [('value', '?xn', '?vnx'), ('value', '?yn', '?vny'),
+                              ('value', '?xd', '?vxd'), ('value', '?yd', '?vyd')]], # 2nd subtasks list conds
+                 subtasks=[[Task(head=('intAdd', 'xn', 'yn', 'nom'), primitive=True),
+                            Task(head=('assign', 'xd', 'denom'), primitive=True)], # 1st subtasks list
+                           ([(Task(head=('intMult', '?xn', '?yd', 'nom1'), primitive=True),
+                              Task(head=('intMult', '?yn', '?xd', 'nom2'), primitive=True)),
+                              Task(head=('intAdd', 'nom1', 'nom2', 'nom'), primitive=True)],
+                              Task(head=('intMult', 'xd', 'yd', 'denom'), primitive=True))]), # 2nd subtasks list
 ```
 
 ### Task
