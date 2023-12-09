@@ -32,7 +32,8 @@ Specify the head which will evaluate as true when the tail (conditions) are true
 from shop2.domain import Axiom
 
 equality = Axiom(head=('value-equality', '?x', '?y'), 
-                 conditions=[('value', '?x', '?v'), ('value', '?y', '?v'), (lambda x, y: x<y, '?x', '?y')])
+                 conditions=[('value', '?x', '?v'), ('value', '?y', '?v'),
+                             (lambda x, y: x<y, '?x', '?y')])
 ```
 
 ### Operator
