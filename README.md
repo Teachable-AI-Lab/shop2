@@ -24,7 +24,7 @@ pip install git+https://github.com/Teachable-AI-Lab-TAIL/shop2.git
 
 ## Domain Description
 ### Axiom
-Specify the head which will evaluate as true when the tail (conditions) are true.
+Specify the head which will evaluate as true when the tail (conditions) are true. The code snippet shows an axiom that returns a tuple when two values are equal in the state.
 ```python
 from shop2.domain import Axiom
 
@@ -33,7 +33,7 @@ equality = Axiom(head=('value-equality', '?x', '?y'),
 ```
 
 ### Operator
-Consists of head, conditions, and effects. Delete effects are discerned by using the 'not' keyword in the predicate. Use lambda or normal functions for executing the operator on the bound variables. 
+Consists of head, conditions, and effects. Delete effects are discerned by using the 'not' keyword in the predicate. Use lambda or normal functions for executing the operator on the bound variables. The code snippet shows the operator for adding two numbers.
 ```python
 from shop2.domain import Operator
 
@@ -43,9 +43,9 @@ intAdd = Operator(head=('intAdd', '?x', '?y', '?z'),
 ```
 
 ### Method
-Consists of head, list of conditions for different subtasks lists, and a list of subtasks lists. A subtask can be a primitive task (Operator) or a non-primitive task (Method).
+Consists of a head, a list of conditions for different subtasks lists, and a list of subtasks lists. A subtask can be a primitive task (Operator) or a non-primitive task (Method). The code snippet shows the high-level method for fraction addition, which decomposes based on the nature of the denominator. If denominators are equal, you add the numerators and return the denominator. While, if denominators are different, the formula for the answer is: ((n1*d2) + (n2*d1))/(n1*n2)
 ```python
-from shop2.domain import Methdo
+from shop2.domain import Method
 
 fracAdd = Method(head=('fracAdd', '?xn', '?yn', '?xd', '?yd'),
                  conditions=[[('value', '?xn', '?vnx'), ('value', '?yn', '?vny'),
@@ -74,3 +74,10 @@ For further details refer to run.py.
 ```
 python run.py
 ```
+
+## Contact Information
+
+For support, questions, or contributions, please contact us:
+
+- **Email**: [msiddiqui66@gatech.edu](mailto:msiddiqui66@gatech.edu)
+- **GitHub Issues**: [Submit Issue](https://github.com/Teachable-AI-Lab-TAIL/shop2/issues)
