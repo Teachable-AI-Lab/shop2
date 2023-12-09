@@ -4,10 +4,10 @@
 
 ## Overview
 
-This project is an implementation of SHOP2 (Simple Hierarchical Ordered Planner 2) in Python, featuring a Horn clause inference engine. 
-SHOP2 is a powerful AI planning system known for its efficiency and effectiveness in handling a variety of planning problems. Additionally, 
-supports partial ordering. Our implementation leverages Python's flexibility and accessibility to provide an easy-to-use, yet powerful 
-planning solution.
+This project is a Python implementation of SHOP2 (Simple Hierarchical Ordered Planner 2), featuring a Horn clause inference engine. 
+SHOP2 is a powerful AI planning system known for its efficiency and effectiveness in handling a variety of planning problems. Additionally,
+in this implementation, the plan can express partial ordering. Refer to ![Nau et al. 2003](https://www.cs.umd.edu/~nau/papers/nau2001total-order.pdf)
+for more details.
 
 ## Features
 
@@ -46,7 +46,8 @@ intAdd = Operator(head=('intAdd', '?x', '?y', '?z'),
 ```
 
 ### Method
-Consists of a head, a list of conditions for different subtasks lists, and a list of subtasks lists. A subtask can be a primitive task (Operator) or a non-primitive task (Method). The code snippet shows the high-level method for fraction addition, which decomposes based on the nature of the denominator. If denominators are equal, you add the numerators and return the denominator. While, if denominators are different, the formula for the answer is: ((n1 * d2) + (n2 * d1)) / (d1 * d2)
+Consists of a head, a list of conditions for different subtasks lists, and a list of subtasks lists. A subtask can be a primitive task (Operator) or a non-primitive task (Method). The code snippet shows the high-level method for fraction addition, which decomposes based on the nature of the denominator. If denominators are equal, you add the numerators and return the denominator. While, if denominators are different, the formula includes multiplying the other number's denominator with their numerator before adding and dividing by the product of the two denominators.
+
 ```python
 from shop2.domain import Method
 
