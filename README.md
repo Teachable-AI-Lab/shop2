@@ -43,11 +43,16 @@ Consists of head, list of conditions for different subtask lists, and a list of 
 from shop2.domain import Methdo
 
 fracAdd = Method(head=('fracAdd', '?xn', '?yn', '?xd', '?yd'),
-                          conditions=[[('value', '?xn', '?vnx'), ('value', '?yn', '?vny'), ('value', '?xd', '?vd'), ('value', '?yd', '?vd')],
-                                      [('value', '?xn', '?vnx'), ('value', '?yn', '?vny'), ('value', '?xd', '?vxd'), ('value', '?yd', '?vyd')]],
-                          subtasks=[[Task(head=('intAdd', 'xn', 'yn', 'nom'), primitive=True), Task(head=('assign', 'xd', 'denom'), primitive=True)],
-                                    ([(Task(head=('intMult', '?xn', '?yd', 'nom1'), primitive=True), Task(head=('intMult', '?yn', '?xd', 'nom2'), primitive=True)), Task(head=('intAdd', 'nom1', 'nom2', 'nom'), primitive=True)],
-                                     Task(head=('intMult', 'xd', 'yd', 'denom'), primitive=True))]),
+                          conditions=[[('value', '?xn', '?vnx'), ('value', '?yn', '?vny'),
+                                       ('value', '?xd', '?vd'), ('value', '?yd', '?vd')],
+                                      [('value', '?xn', '?vnx'), ('value', '?yn', '?vny'),
+                                       ('value', '?xd', '?vxd'), ('value', '?yd', '?vyd')]],
+                          subtasks=[[Task(head=('intAdd', 'xn', 'yn', 'nom'), primitive=True),
+                                     Task(head=('assign', 'xd', 'denom'), primitive=True)],
+                                    ([(Task(head=('intMult', '?xn', '?yd', 'nom1'), primitive=True),
+                                       Task(head=('intMult', '?yn', '?xd', 'nom2'), primitive=True)),
+                                       Task(head=('intAdd', 'nom1', 'nom2', 'nom'), primitive=True)],
+                                       Task(head=('intMult', 'xd', 'yd', 'denom'), primitive=True))]),
 ```
 
 ### Task
