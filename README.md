@@ -1,5 +1,7 @@
 # SHOP2 Implementation in Python
 
+![Build Status](https://github.com/Teachable-AI-Lab-TAIL/shop2/workflows/Python%20Application%20CI/badge.svg)
+
 ## Overview
 
 This project is an implementation of SHOP2 (Simple Hierarchical Ordered Planner 2) in Python, featuring a Horn clause inference engine. 
