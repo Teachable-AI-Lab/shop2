@@ -1,4 +1,4 @@
-# SHOP2 Implementation in Python
+# Python SHOP2
 
 ![Build Status](https://github.com/Teachable-AI-Lab-TAIL/shop2/workflows/Build/badge.svg)
 
