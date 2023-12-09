@@ -59,7 +59,7 @@ class Method:
     def __init__(self, head, conditions=list(), subtasks=list(), cost=1):
         self.head = head
         self.name = head[0]
-        self.conditions = conditions
+        self.conditions = [set(condition) for condition in conditions]
         self.subtasks = subtasks
         self.cost = cost # TODO cost = sum of costs of operators in subtasks
 

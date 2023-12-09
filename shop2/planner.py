@@ -14,7 +14,7 @@ def SHOP2(state: Set, T: Union[List, Tuple], D: Dict, debug=False) -> Union[List
     stack, visited = list(), list() # used for backtracking from invalid plan
     while True:
         if not T:
-            return replaceHead(plan), state 
+            return plan, state 
         for axiom in D.get('axioms', []):
             state = axiom.applicable(state)
         T0 = getT0(T)
@@ -32,7 +32,7 @@ def SHOP2(state: Set, T: Union[List, Tuple], D: Dict, debug=False) -> Union[List
                 else:
                     return False
         else:
-            if (result := D[task.name].applicable(task, state, str(plan), visited, debug=debug)): # NOTE plan is passed as string just because it is more convenient to pass it as string than its original structure
+            if (result := D[task.name].applicable(task, state, str(plan), visited, debug=debug)):
                 stack.append((deepcopy(T), deepcopy(plan), deepcopy(state)))
                 subtask = result
                 plan = replaceTask(plan, task, subtask)
