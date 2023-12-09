@@ -17,6 +17,24 @@ planning solution.
 - Python version >= 3.8
 - Install python package py_plan==1.0 
 
+## Domain Description
+### Axiom
+Specify the head which will evaluate as true when the tail (conditions) are true.
+```
+from shop2.domain import Axiom
+Axiom(head=('value-equality', '?x', '?y'), 
+      conditions=[('value', '?x', '?v'), ('value', '?y', '?v'), (lambda x, y: x<y, '?x', '?y')])
+```
+
+### Operator
+Consists of head, conditions, and effects. Delete effects are discerned by using the 'not' keyword in the predicate. Use lambda or normal functions for executing the operator on the bound variables. 
+```
+from shop2.domain import Operator
+"intAdd": Operator(head=('intAdd', '?x', '?y', '?z'),
+                        conditions=[('value', '?x', '?vx'), ('value', '?y', '?vy')],
+                        effects=[('value', '?z', (lambda x,y: x+y, '?vx', '?vy'))]),
+```
+
 ## Commands
 ```
 python run.py
