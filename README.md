@@ -79,8 +79,10 @@ For further details refer to run.py.
 The planner SHOP2 requires state, tasks, and the domain description as arguments. There is an optional debug argument, which provides verbose details of the planner, enabling robust debugging.
 
 ```python
-state = state = set([('value', 'xn', 4), ('value', 'yn', 1), ('operator', 'op', '+')])
-domain = {...}
+from shop2.planner import SHOP2
+
+state = set([('value', 'xn', 4), ('value', 'yn', 1), ('operator', 'op', '+')])
+Domain = {...}
 Tasks = [Task(head=('solve',), primitive=False)]
 
 plan, state = SHOP2(state, Tasks, Domain)
