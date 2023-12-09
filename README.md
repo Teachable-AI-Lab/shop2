@@ -22,7 +22,8 @@ planning solution.
 Specify the head which will evaluate as true when the tail (conditions) are true.
 ```python
 from shop2.domain import Axiom
-Axiom(head=('value-equality', '?x', '?y'), 
+
+equality = Axiom(head=('value-equality', '?x', '?y'), 
       conditions=[('value', '?x', '?v'), ('value', '?y', '?v'), (lambda x, y: x<y, '?x', '?y')])
 ```
 
@@ -30,9 +31,31 @@ Axiom(head=('value-equality', '?x', '?y'),
 Consists of head, conditions, and effects. Delete effects are discerned by using the 'not' keyword in the predicate. Use lambda or normal functions for executing the operator on the bound variables. 
 ```python
 from shop2.domain import Operator
-"intAdd": Operator(head=('intAdd', '?x', '?y', '?z'),
+
+intAdd = Operator(head=('intAdd', '?x', '?y', '?z'),
                         conditions=[('value', '?x', '?vx'), ('value', '?y', '?vy')],
                         effects=[('value', '?z', (lambda x,y: x+y, '?vx', '?vy'))]),
+```
+
+### Method
+Consists of head, list of conditions for different subtask lists, and a list of subtask lists. A subtask can be a primitive task (Operator) or a non-primitive task (Method).
+```python
+from shop2.domain import Methdo
+
+fracAdd = Method(head=('fracAdd', '?xn', '?yn', '?xd', '?yd'),
+                          conditions=[[('value', '?xn', '?vnx'), ('value', '?yn', '?vny'), ('value', '?xd', '?vd'), ('value', '?yd', '?vd')],
+                                      [('value', '?xn', '?vnx'), ('value', '?yn', '?vny'), ('value', '?xd', '?vxd'), ('value', '?yd', '?vyd')]],
+                          subtasks=[[Task(head=('intAdd', 'xn', 'yn', 'nom'), primitive=True), Task(head=('assign', 'xd', 'denom'), primitive=True)],
+                                    ([(Task(head=('intMult', '?xn', '?yd', 'nom1'), primitive=True), Task(head=('intMult', '?yn', '?xd', 'nom2'), primitive=True)), Task(head=('intAdd', 'nom1', 'nom2', 'nom'), primitive=True)],
+                                     Task(head=('intMult', 'xd', 'yd', 'denom'), primitive=True))]),
+```
+
+### Task
+Consists of a head and flag for primitive status. It can either be primitive or non-primitive. The SHOP2 planner accepts a list of tasks as input.
+```python
+from shop2.domain import Task
+
+solve = Task(head=('solve',), primitive=False)
 ```
 
 ## Commands
