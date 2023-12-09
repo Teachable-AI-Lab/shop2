@@ -20,7 +20,7 @@ planning solution.
 ## Domain Description
 ### Axiom
 Specify the head which will evaluate as true when the tail (conditions) are true.
-```
+```python
 from shop2.domain import Axiom
 Axiom(head=('value-equality', '?x', '?y'), 
       conditions=[('value', '?x', '?v'), ('value', '?y', '?v'), (lambda x, y: x<y, '?x', '?y')])
@@ -28,7 +28,7 @@ Axiom(head=('value-equality', '?x', '?y'),
 
 ### Operator
 Consists of head, conditions, and effects. Delete effects are discerned by using the 'not' keyword in the predicate. Use lambda or normal functions for executing the operator on the bound variables. 
-```
+```python
 from shop2.domain import Operator
 "intAdd": Operator(head=('intAdd', '?x', '?y', '?z'),
                         conditions=[('value', '?x', '?vx'), ('value', '?y', '?vy')],
