@@ -19,6 +19,7 @@ planning solution.
 ## Installation 
 ```
 git clone https://github.com/Teachable-AI-Lab-TAIL/shop2.git
+
 pip install git+https://github.com/Teachable-AI-Lab-TAIL/shop2.git
 ```
 
@@ -43,7 +44,7 @@ intAdd = Operator(head=('intAdd', '?x', '?y', '?z'),
 ```
 
 ### Method
-Consists of a head, a list of conditions for different subtasks lists, and a list of subtasks lists. A subtask can be a primitive task (Operator) or a non-primitive task (Method). The code snippet shows the high-level method for fraction addition, which decomposes based on the nature of the denominator. If denominators are equal, you add the numerators and return the denominator. While, if denominators are different, the formula for the answer is: ((n1*d2) + (n2*d1))/(n1*n2)
+Consists of a head, a list of conditions for different subtasks lists, and a list of subtasks lists. A subtask can be a primitive task (Operator) or a non-primitive task (Method). The code snippet shows the high-level method for fraction addition, which decomposes based on the nature of the denominator. If denominators are equal, you add the numerators and return the denominator. While, if denominators are different, the formula for the answer is: ((n1 * d2) + (n2 * d1)) / (d1 * d2)
 ```python
 from shop2.domain import Method
 
