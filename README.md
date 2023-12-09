@@ -6,7 +6,7 @@
 
 This project is a Python implementation of SHOP2 (Simple Hierarchical Ordered Planner 2), featuring a Horn clause inference engine. 
 SHOP2 is a powerful AI planning system known for its efficiency and effectiveness in handling a variety of planning problems. Additionally,
-in this implementation, the plan can express partial ordering. Refer to [Nau et al. 2003](https://www.cs.umd.edu/~nau/papers/nau2001total-order.pdf)
+in this implementation, the plan can express partial ordering. Refer to [Nau et al. 2003](https://www.cs.umd.edu/~nau/papers/nau2003shop2.pdf)
 for more details.
 
 ## Features
