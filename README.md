@@ -15,7 +15,12 @@ planning solution.
 ## Prerequisites
 
 - Python version >= 3.8
-- Install python package py_plan==1.0 
+
+## Installation 
+```
+git clone https://github.com/Teachable-AI-Lab-TAIL/shop2.git
+pip install git+https://github.com/Teachable-AI-Lab-TAIL/shop2.git
+```
 
 ## Domain Description
 ### Axiom
@@ -62,6 +67,8 @@ from shop2.domain import Task
 
 solve = Task(head=('solve',), primitive=False)
 ```
+
+For further details refer to run.py.
 
 ## Commands
 ```
