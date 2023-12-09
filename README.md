@@ -75,6 +75,16 @@ solve = Task(head=('solve',), primitive=False)
 
 For further details refer to run.py.
 
+## Planner
+The planner SHOP2 requires state, tasks, and the domain description as arguments. There is an optional debug argument, which provides verbose details of the planner, enabling robust debugging.
+
+```python
+state = state = set([('value', 'xn', 4), ('value', 'yn', 1), ('operator', 'op', '+')])
+domain = {...}
+Tasks = [Task(head=('solve',), primitive=False)]
+
+plan, state = SHOP2(state, Tasks, Domain)
+```
 ## Commands
 ```
 python run.py
