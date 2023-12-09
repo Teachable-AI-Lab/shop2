@@ -1,6 +1,6 @@
 # SHOP2 Implementation in Python
 
-![Build Status](https://github.com/Teachable-AI-Lab-TAIL/shop2/workflows/Python%20Application%20CI/badge.svg)
+![Build Status](https://github.com/Teachable-AI-Lab-TAIL/shop2/workflows/Build/badge.svg)
 
 ## Overview
 
