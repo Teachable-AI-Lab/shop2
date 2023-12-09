@@ -44,9 +44,9 @@ from shop2.domain import Methdo
 
 fracAdd = Method(head=('fracAdd', '?xn', '?yn', '?xd', '?yd'),
                           conditions=[[('value', '?xn', '?vnx'), ('value', '?yn', '?vny'),
-                                       ('value', '?xd', '?vd'), ('value', '?yd', '?vd')], #conditions for 1st subtasks list
+                                       ('value', '?xd', '?vd'), ('value', '?yd', '?vd')], # 1st subtasks list conds
                                       [('value', '?xn', '?vnx'), ('value', '?yn', '?vny'),
-                                       ('value', '?xd', '?vxd'), ('value', '?yd', '?vyd')]], # conditions for 2nd subtasks list
+                                       ('value', '?xd', '?vxd'), ('value', '?yd', '?vyd')]], # 2nd subtasks list conds
                           subtasks=[[Task(head=('intAdd', 'xn', 'yn', 'nom'), primitive=True),
                                      Task(head=('assign', 'xd', 'denom'), primitive=True)], # 1st subtasks list
                                     ([(Task(head=('intMult', '?xn', '?yd', 'nom1'), primitive=True),
