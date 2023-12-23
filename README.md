@@ -87,6 +87,24 @@ Tasks = [Task(head=('solve',), primitive=False)]
 
 plan, state = SHOP2(state, Tasks, Domain)
 ```
+
+## Integration with py_rete 
+Can convert py_rete Facts to predicate tuples and vice-versa. Specify pkey (primary key) to ensure there are no ambiguity.
+
+```python
+from py_rete import Fact
+from shop2.utils import toFacts, toPredicates
+
+
+facts = [
+    Fact(id=1, color='red', shape='square'),
+    Fact(id=12, color='blue', shape='triangle'),
+    Fact(id=3, color='green', shape='circle')
+]
+
+predicates = toPredicates(facts, pkey='id')
+facts = toFacts(predicates, pkey='ids')
+```
 ## Commands
 ```
 python run.py

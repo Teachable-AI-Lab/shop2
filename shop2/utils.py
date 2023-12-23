@@ -3,7 +3,48 @@ from itertools import chain
 from operator import or_
 from typing import List, Tuple, Union
 from shop2.domain import Task 
-   
+from py_rete import Fact
+from collections import defaultdict
+
+def toPredicates(facts, pkey=None):
+  """
+  Convert List of py_rete Facts to predicate tuples. pkey refers to the primary 
+  key which will be the middle term of every tuple. If pkey is not defined a 
+  unique number is assgined as pkey for each new Fact.
+  """
+  predicates = list()
+  if isinstance(pkey, (int, float)) or (isinstance(pkey, str) and pkey.isdigit()):
+        raise ValueError("pkey should not be a number or a numeric string.")
+
+  if pkey is None: pkey = 0
+  for fact in facts:
+    if not isinstance(pkey, (int, float)):
+      if pkey not in fact:
+              raise ValueError(f"pkey '{pkey}' not found in fact: {fact}")      
+      predicates.extend([(key, fact[pkey], value) for key, value in fact.items() if key != pkey])
+    else:
+      predicates.extend([(key, pkey, value) for key, value in fact.items()])
+      pkey += 1
+
+  return predicates
+
+
+def toFacts(predicates, pkey):
+  """
+  Convert List of predicate tuples to py_rete Facts. pkey refers the name of the 
+  primary key for the list of Facts. If pkey is not in predicates, it creates a
+  new fact argument.
+  """
+  factdict = defaultdict(dict)
+  for predicate in predicates:
+    factdict[predicate[1]][predicate[0]] = predicate[2]
+  
+  facts = list()
+  for key, value in factdict.items():
+    factargs = {pkey:key, **value}      
+    facts.append(Fact(**factargs))
+
+  return facts
 
 def getT0(T: Union[List, Tuple]) -> Union[List, Tuple]:
     """
