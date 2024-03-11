@@ -86,11 +86,16 @@ class Operator:
         self.add_effects = set()
         self.del_effects = set()
 
-        for e in self.effects:
-            if isinstance(e, NOT):
-                self.del_effects.add(e[0])
-            else:
-                self.add_effects.add(e)
+        if isinstance(self.effects, Fact):
+            self.add_effects.add(self.effects)
+        elif isinstance(self.effects, NOT):
+            self.del_effects.add(self.effects[0])
+        else:     
+            for e in self.effects:
+                if isinstance(e, NOT):
+                    self.del_effects.add(e[0])
+                else:
+                    self.add_effects.add(e)
 
     def applicable(self, task, state, debug=False):
         add_effects, del_effects = set(), set()

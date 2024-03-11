@@ -9,60 +9,66 @@ from shop2.planner import CoroutinePlanner
 
 Domain = {
     "intAdd": Operator(head=('intAdd', V('x'), V('y'), V('z')),
-                        conditions=(Fact(field=V('x'), value=V('vx'))&Fact(field=V('y'), value=V('vy'))),
-                        effects=[Fact(field=V('z'), value=(lambda x,y: x+y, V('vx'), V('vy')))]),
+                        precondition=(Fact(field=V('x'), value=V('vx'))&
+                                      Fact(field=V('y'), value=V('vy'))),
+                        effects=Fact(field=V('z'), value=(lambda x,y: x+y, V('vx'), V('vy')))),
 
     "intMult": Operator(head=('intMult', V('x'), V('y'), V('z')),
-                        conditions=(Fact(field=V('x'), value=V('vx'))&Fact(field=V('y'), value=V('vy'))),
-                        effects=[Fact(field=V('z'), value=(lambda x,y: x*y, V('vx'), V('vy')))]),
+                        precondition=(Fact(field=V('x'), value=V('vx'))&
+                                      Fact(field=V('y'), value=V('vy'))),
+                        effects=Fact(field=V('z'), value=(lambda x,y: x*y, V('vx'), V('vy')))),
 
     "find_num_with_lcm": Operator(head=('find_num_with_lcm', V('xn'), V('x') , V('y'), V('z')),
-                                  conditions=(Fact(field=V('x'), value=V('xv'))&Fact(field=V('y'), value=V('vy'))&Fact(field=V('xn'), value=V('xnv'))),
-                                  effects=[Fact(field=V('z'), value=(lambda xn,x,y: int(xn*((abs(x*y)//math.gcd(x,y))/x)), V('xnv'), V('xv'), V('vy')))]),
+                                  precondition=(Fact(field=V('x'), value=V('xv'))&
+                                                Fact(field=V('y'), value=V('vy'))&
+                                                Fact(field=V('xn'), value=V('xnv'))),
+                                  effects=Fact(field=V('z'), value=(lambda xn,x,y: int(xn*((abs(x*y)//math.gcd(x,y))/x)), V('xnv'), V('xv'), V('vy')))),
 
     "find_den_with_lcm": Operator(head=('find_den_with_lcm', '?x' , '?y', '?z'),
-                                  conditions=(Fact(field=V('x'), value=V('vx'))&Fact(field=V('y'), value=V('vy'))),
-                                  effects=[Fact(field=V('z'), value=(lambda x,y: int(abs(x*y)//math.gcd(x,y)), V('vx'), V('vy')))]),
+                                  precondition=(Fact(field=V('x'), value=V('vx'))&
+                                                Fact(field=V('y'), value=V('vy'))),
+                                  effects=Fact(field=V('z'), value=(lambda x,y: int(abs(x*y)//math.gcd(x,y)), V('vx'), V('vy')))),
 
     "fracAdd": Method(head=('fracAdd',),
-                      conditions=[~Fact(field="button", value="done"), ~Fact(field="button", value="done")],
+                      preconditions=[~Fact(field="button", value="done"), 
+                                     ~Fact(field="button", value="done")],
                       subtasks=[[Task(head=('cross_Mult',), primitive=False)], 
                                 [Task(head=('lcm',), primitive=False)]]
                     ),
 
     "cross_Mult": Method(head=('cross_Mult',),
-                        conditions=[~Fact(field="button", value="done")],
+                        preconditions=[~Fact(field="button", value="done")],
                         subtasks=[(Task(head=('get_num_cross_Mult',) ,primitive=False), 
                                    Task(head=('get_den_cross_Mult',), primitive=False))]
                         ),
 
     "lcm": Method(head=('lcm',),
-                  conditions=[~Fact(field="button", value="done")],
+                  preconditions=[~Fact(field="button", value="done")],
                   subtasks=[(Task(head=('get_num_lcm',), primitive=False), 
                              Task(head=('get_den_lcm',), primitive=False))]
                   ),
 
     "get_num_cross_Mult": Method(head=('get_num_cross_Mult',),
-                                conditions=[~Fact(field="button", value="done")],
+                                preconditions=[~Fact(field="button", value="done")],
                                 subtasks=[[(Task(head=('intMult', 'num_x', 'den_y', 'n1xd2'), primitive=True), 
                                             Task(head=('intMult', 'num_y', 'den_x', 'n2xd1'), primitive=True)),
                                             Task(head=('intAdd', 'n1xd2', 'n2xd1', 'num'), primitive=True)]]
                                 ),
 
     "get_den_cross_Mult": Method(head=('get_den_cross_Mult',),
-                                 conditions=[~Fact(field="button", value="done")],
+                                 preconditions=[~Fact(field="button", value="done")],
                                  subtasks=[[Task(head=('intMult', 'den_x', 'den_y', 'denom'), primitive=True)]]
                                  ),
 
     "get_num_lcm": Method(head=('get_num_lcm',),
-                          conditions=[~Fact(field="button", value="done")],
+                          preconditions=[~Fact(field="button", value="done")],
                           subtasks=[[(Task(head=('find_num_with_lcm', 'num_x', 'den_x', 'den_y', 'n1xd2'), primitive=True), 
                                       Task(head=('find_num_with_lcm', 'num_y', 'den_y', 'den_x', 'n2xd1'), primitive=True)), 
                                       Task(head=('intAdd', 'n1xd2', 'n2xd1', 'num'), primitive=True)]]
                         ),
 
     "get_den_lcm": Method(head=('get_den_lcm',),
-                          conditions=[~Fact(field="button", value="done")],
+                          preconditions=[~Fact(field="button", value="done")],
                           subtasks=[[Task(head=('find_den_with_lcm', 'den_x', 'den_y', 'denom'), primitive=True)]]
                           ),
     
