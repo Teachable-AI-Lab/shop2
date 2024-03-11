@@ -37,10 +37,10 @@ class Method:
     """
     As defined for Method in domain description of SHOP2
     """
-    def __init__(self, head, conditions=list(), subtasks=list(), cost=1):
+    def __init__(self, head, preconditions=list(), subtasks=list(), cost=1):
         self.head = head
         self.name = head[0]
-        self.conditions = conditions
+        self.preconditions = preconditions
         self.subtasks = subtasks
         self.cost = cost # TODO cost = sum of costs of operators in subtasks
 
@@ -48,14 +48,14 @@ class Method:
         ptstate = fact2tuple(state, variables=False)[0]
         index = build_index(ptstate)
         substitutions = unify(task.head, self.head)
-        for condition, subtask in zip(self.conditions, self.subtasks):
+        for condition, subtask in zip(self.preconditions, self.subtasks):
             ptconditions = fact2tuple(condition, variables=True)
             for ptcondition in ptconditions:
                 if (str(subtask), str(state), plan) in visited:
                     continue
                 M = [(self.name, theta) for theta in pattern_match(ptcondition, index, substitutions)] # Find if method's precondition is satisfied for state
                 if debug:
-                    print("Task: {}\nCondition: {}\nState: {}\nSubstitutions: {}\nApplicable Operators: {}\n\n".format(task.head, self.conditions, state, substitutions, M))
+                    print("Task: {}\nPreconditions: {}\nState: {}\nSubstitutions: {}\nApplicable Operators: {}\n\n".format(task.head, self.preconditions, state, substitutions, M))
                 if M: 
                     m, theta = choice(M)
                     visited.append((str(subtask),str(state), plan))
@@ -64,7 +64,7 @@ class Method:
 
     def __str__(self):
         s = f"Name: {self.name}\n"
-        s += f"Conditions: {self.conditions}\n"
+        s += f"Preconditions: {self.preconditions}\n"
         s += f"Subtasks: {self.subtasks}\n"
         s += f"Cost: {self.cost:.2f}\n"
         return s
@@ -76,10 +76,10 @@ class Operator:
     """
     As defined for Operator in domain description of SHOP2
     """
-    def __init__(self, head, conditions, effects, cost=1):
+    def __init__(self, head, precondition, effects, cost=1):
         self.head = head
         self.name = head[0]
-        self.conditions = conditions
+        self.precondition = precondition
         self.effects = effects
         self.cost = cost
 
@@ -103,11 +103,11 @@ class Operator:
         index = build_index(ptstate)
         
         substitutions = unify(task.head, self.head)
-        ptconditions = fact2tuple(self.conditions, variables=True)
+        ptconditions = fact2tuple(self.precondition, variables=True)
         for ptcondition in ptconditions:
             A = [(self.name, theta) for theta in pattern_match(ptcondition, index, substitutions)] # Find if operator's precondition is satisfied for state
             if debug:
-                    print("Task: {}\nCondition: {}\nState: {}\nSubstitutions: {}\nApplicable Operators: {}\n\n".format(task.head, self.conditions, state, substitutions, A))
+                    print("Task: {}\nPrecondition: {}\nState: {}\nSubstitutions: {}\nApplicable Operators: {}\n\n".format(task.head, self.precondition, state, substitutions, A))
             if A:
                 a, theta = choice(A)
                 for effect in chain(add_effects, del_effects):
@@ -121,7 +121,7 @@ class Operator:
     
     def __str__(self):
         s = f"Name: {self.name}\n"
-        s += f"Conditions: {self.conditions}\n"
+        s += f"Precondition: {self.precondition}\n"
         s += f"Effects: {self.effects}\n"
         s += f"Cost: {self.cost:.2f}\n"
         return s

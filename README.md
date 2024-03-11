@@ -4,7 +4,7 @@
 
 ## Overview
 
-This project is a Python implementation of SHOP2 (Simple Hierarchical Ordered Planner 2) with Facts from Py_RETE.
+This project is a Python implementation of SHOP2 (Simple Hierarchical Ordered Planner 2) with Facts from Py_RETE instead of predicate tuples.
 SHOP2 is a powerful AI planning system known for its efficiency and effectiveness in handling a variety of planning problems and Facts provide simplicity in authoring domains. Additionally, in this implementation, the plan can express partial ordering along. Refer to [Nau et al. 2003](https://www.cs.umd.edu/~nau/papers/nau2003shop2.pdf) and [py_rete](https://github.com/cmaclell/py_rete/tree/master)
 for more details.
 
@@ -26,23 +26,23 @@ pip install git+https://github.com/Teachable-AI-Lab-TAIL/shop2.git@facts
 
 ## Domain Description
 ### Operator
-Consists of head, conditions, and effects. Delete effects are discerned by using the 'not' keyword in the predicate. Use lambda or normal functions for executing the operator on the bound variables. The code snippet shows the operator for adding two numbers.
+Consists of head, precondition, and effects. Delete effects are discerned by using the 'not' keyword in the predicate. Use lambda or normal functions for executing the operator on the bound variables. The code snippet shows the operator for adding two numbers.
 ```python
 from shop2.domain import Operator
 
 intAdd = Operator(head=('intAdd', V('x'), V('y'), V('z')),
-                        conditions=(Fact(field=V('x'), value=V('vx'))&Fact(field=V('y'), value=V('vy'))),
+                        precondition=(Fact(field=V('x'), value=V('vx'))&Fact(field=V('y'), value=V('vy'))),
                         effects=[Fact(field=V('z'), value=(lambda x,y: x+y, V('vx'), V('vy')))]),
 ```
 
 ### Method
-Consists of a head, a list of conditions for different subtasks lists, and a list of subtasks lists. A subtask can be a primitive task (Operator) or a non-primitive task (Method). The code snippet shows the high-level method for fraction addition, which decomposes based on the nature of the denominator. If denominators are equal, you add the numerators and return the denominator. While, if denominators are different, the formula includes multiplying the other number's denominator with their numerator before adding and dividing by the product of the two denominators.
+Consists of a head, a list of preconditions for different subtasks lists, and a list of subtasks lists. A subtask can be a primitive task (Operator) or a non-primitive task (Method). The code snippet shows the high-level method for fraction addition, which decomposes based on the nature of the denominator. If denominators are equal, you add the numerators and return the denominator. While, if denominators are different, the formula includes multiplying the other number's denominator with their numerator before adding and dividing by the product of the two denominators.
 
 ```python
 from shop2.domain import Method
 
 "fracAdd": Method(head=('fracAdd', V('xn'), V('yn'), V('xd'), V('yd')),
-                          conditions=[(Fact(field=V('xn'),value=V('vnx'))& Fact(field=V('yn'),value=V('vny'))&Fact(field=V('xd'),value=V('vd'))&Fact(field=V('yd',value=V('vd'))),
+                          preconditions=[(Fact(field=V('xn'),value=V('vnx'))&Fact(field=V('yn'),value=V('vny'))&Fact(field=V('xd'),value=V('vd'))&Fact(field=V('yd',value=V('vd'))),
                                       (Fact(field=V('xn'),value=V('vnx'))&Fact(field=V('yn'),value=V('vny'))&Fact(field=V('xd'),value=V('vxd'))&Fact(field=V('yd',value=V('vyd')))],
                           subtasks=[[Task(head=('intAdd', 'xn', 'yn', 'nom'), primitive=True), Task(head=('assign', 'xd', 'denom'), primitive=True)],
                                     ([(Task(head=('intMult', V('xn'), V('yd'), 'nom1'), primitive=True), Task(head=('intMult', V('yn'), V('xd'), 'nom2'), primitive=True)), Task(head=('intAdd', 'nom1', 'nom2', 'nom'), primitive=True)],
