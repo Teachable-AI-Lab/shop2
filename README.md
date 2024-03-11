@@ -31,8 +31,9 @@ Consists of head, precondition, and effects. Delete effects are discerned by usi
 from shop2.domain import Operator
 
 intAdd = Operator(head=('intAdd', V('x'), V('y'), V('z')),
-                        precondition=(Fact(field=V('x'), value=V('vx'))&Fact(field=V('y'), value=V('vy'))),
-                        effects=[Fact(field=V('z'), value=(lambda x,y: x+y, V('vx'), V('vy')))]),
+                  precondition=(Fact(field=V('x'), value=V('vx'))&
+                                Fact(field=V('y'), value=V('vy'))),
+                  effects=Fact(field=V('z'), value=(lambda x,y: x+y, V('vx'), V('vy')))),
 ```
 
 ### Method
