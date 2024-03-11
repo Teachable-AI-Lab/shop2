@@ -93,14 +93,6 @@ class NOT(ConditionalList, ComposableCond):
     pass
 
 
-# class EXISTS(ConditionalElement, ComposableCond):
-#     pass
-#
-#
-# class FORALL(ConditionalElement, ComposableCond):
-#     pass
-
-
 class Cond(ConditionalElement, ComposableCond):
     """
     Essentially a pattern/condition to match, can have variables.
