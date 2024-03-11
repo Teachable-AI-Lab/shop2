@@ -1,4 +1,4 @@
-from shop2.domain import Task, Operator, Method, Axiom
+from shop2.domain import Task, Operator, Method
 from shop2.planner import SHOP2
 from shop2.fact import Fact
 from shop2.common import V
@@ -7,10 +7,6 @@ from shop2.conditions import Filter, NOT
 
 #Domain Description
 Domain = {
-        "assign": Operator(head=('assign', V('x'), V('y')),
-                           precondition=Fact(field=V('x'), value=V('vx')),
-                           effects=[Fact(field=V('y'), value=V('vx'))]),
-
         "intAdd": Operator(head=('intAdd', V('x'), V('y'), V('z')),
                         precondition=(Fact(field=V('x'), value=V('vx'))&Fact(field=V('y'), value=V('vy'))),
                         effects=[Fact(field=V('z'), value=(lambda x,y: x+y, V('vx'), V('vy')))]),
