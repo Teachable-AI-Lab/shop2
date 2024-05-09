@@ -79,6 +79,7 @@ Domain = {
         ],
 }
 
+
 if __name__ == "__main__":
 
     numerator_x, numerator_y = 1, 3
@@ -94,6 +95,7 @@ if __name__ == "__main__":
 
     if result := planner(state, Tasks, Domain, debug=False): 
         plan, nstate = result
+        print(plan)
         print(state)
         print(nstate)
     else:

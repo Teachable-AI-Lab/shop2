@@ -54,7 +54,7 @@ from shop2.conditions import AND
 
 
 def planner(state: Fact, T: Union[List, Tuple], D: Dict, debug=False) -> Union[List, Tuple, bool]:
-    plan = deepcopy(T)
+    plan = []
     stack, inner_visited, outer_visited = [], [], [] # used for backtracking from invalid plan
     while True:
         if not T:
@@ -73,6 +73,7 @@ def planner(state: Fact, T: Union[List, Tuple], D: Dict, debug=False) -> Union[L
                     for effect in add_effects:
                         state = state & effect
                     T = removeTask(T, task)
+                    plan.append(action)
                     success = True
                     break
 
@@ -80,7 +81,6 @@ def planner(state: Fact, T: Union[List, Tuple], D: Dict, debug=False) -> Union[L
                 if (result := action.applicable(task, state, str(plan), inner_visited, debug=debug)):
                     stack.append((deepcopy(T), deepcopy(plan), deepcopy(state)))
                     subtask = result
-                    plan = replaceTask(plan, task, subtask)
                     T = type(T)([subtask])+removeTask(T, task)
                     success = True
                     break
