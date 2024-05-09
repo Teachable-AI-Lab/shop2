@@ -37,9 +37,10 @@ class Method:
     """
     As defined for Method in domain description of SHOP2
     """
-    def __init__(self, head, preconditions=list(), subtasks=list(), cost=1):
+    def __init__(self, head, preconditions=[], subtasks=[], cost=1):
         self.head = head
         self.name = head[0]
+        self.args = head[1:]
         self.preconditions = preconditions
         self.subtasks = subtasks
         self.cost = cost # TODO cost = sum of costs of operators in subtasks
@@ -51,14 +52,15 @@ class Method:
         for condition, subtask in zip(self.preconditions, self.subtasks):
             ptconditions = fact2tuple(condition, variables=True)
             for ptcondition in ptconditions:
-                if (str(subtask), str(state), plan) in visited:
+                if (task.name, str(ptcondition), str(state), plan) in visited:
                     continue
+                else: 
+                    visited.append((task.name, str(ptcondition),str(state), plan))
                 M = [(self.name, theta) for theta in pattern_match(ptcondition, index, substitutions)] # Find if method's precondition is satisfied for state
                 if debug:
                     print("Task: {}\nPreconditions: {}\nState: {}\nSubstitutions: {}\nApplicable Operators: {}\n\n".format(task.head, self.preconditions, state, substitutions, M))
                 if M: 
                     m, theta = choice(M)
-                    visited.append((str(subtask),str(state), plan))
                     return msubst(theta, subtask)
         return False
 
@@ -76,10 +78,11 @@ class Operator:
     """
     As defined for Operator in domain description of SHOP2
     """
-    def __init__(self, head, precondition, effects, cost=1):
+    def __init__(self, head, preconditions, effects, cost=1):
         self.head = head
         self.name = head[0]
-        self.precondition = precondition
+        self.args = head[1:]
+        self.preconditions = preconditions
         self.effects = effects
         self.cost = cost
 
@@ -108,7 +111,7 @@ class Operator:
         index = build_index(ptstate)
         
         substitutions = unify(task.head, self.head)
-        ptconditions = fact2tuple(self.precondition, variables=True)
+        ptconditions = fact2tuple(self.preconditions, variables=True)
         for ptcondition in ptconditions:
             A = [(self.name, theta) for theta in pattern_match(ptcondition, index, substitutions)] # Find if operator's precondition is satisfied for state
             if debug:
@@ -126,7 +129,7 @@ class Operator:
     
     def __str__(self):
         s = f"Name: {self.name}\n"
-        s += f"Precondition: {self.precondition}\n"
+        s += f"Preconditions: {self.preconditions}\n"
         s += f"Effects: {self.effects}\n"
         s += f"Cost: {self.cost:.2f}\n"
         return s
@@ -136,18 +139,13 @@ class Operator:
     
 
 class Task:
-    """
-    As defined for Task in domain description of SHOP2
-    """
-    def __init__(self,head, primitive):
-        self.head = head
-        self.name = head[0]
-        self.primitive = primitive
+    def __init__(self,*args):
+        self.name = args[0]
+        self.args = args[1:]
+        self.head = (self.name, *self.args)
         
     def __str__(self):
-        s = f"Name: {self.name}\n"
-        s += f"Primitive: {self.primitive}\n"
-        return s
+        return f"Task(name='{self.name}', args={self.args})"
 
     def __repr__(self):
         return f"<Task {self.name}>"
@@ -157,7 +155,7 @@ def msubst(theta: Dict, tasks: Union[Task, List, Tuple]) -> Union[Task, List, Tu
     Perform substitutions theta on tasks across the structure (of lists and tuples).
     """
     if isinstance(tasks, Task):
-        return Task(subst(theta, tasks.head), tasks.primitive)
+        return Task(*subst(theta, tasks.head))
     else:
         return type(tasks)([msubst(theta, task) for task in tasks])
   
