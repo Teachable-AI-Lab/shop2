@@ -37,7 +37,7 @@ class Method:
     """
     As defined for Method in domain description of SHOP2
     """
-    def __init__(self, head, preconditions=[], subtasks=[], cost=1):
+    def __init__(self, head, preconditions, subtasks, cost=1):
         self.head = head
         self.name = head[0]
         self.args = head[1:]
@@ -49,19 +49,17 @@ class Method:
         ptstate = fact2tuple(state, variables=False)[0]
         index = build_index(ptstate)
         substitutions = unify(task.head, self.head)
-        for condition, subtask in zip(self.preconditions, self.subtasks):
-            ptconditions = fact2tuple(condition, variables=True)
-            for ptcondition in ptconditions:
-                if (task.name, str(ptcondition), str(state), plan) in visited:
-                    continue
-                else: 
-                    visited.append((task.name, str(ptcondition),str(state), plan))
-                M = [(self.name, theta) for theta in pattern_match(ptcondition, index, substitutions)] # Find if method's precondition is satisfied for state
-                if debug:
-                    print("Task: {}\nPreconditions: {}\nState: {}\nSubstitutions: {}\nApplicable Operators: {}\n\n".format(task.head, self.preconditions, state, substitutions, M))
-                if M: 
-                    m, theta = choice(M)
-                    return msubst(theta, subtask)
+        ptconditions = fact2tuple(self.preconditions, variables=True)
+        for ptcondition in ptconditions:
+            if (task.name, str(ptcondition), str(state), plan) in visited:
+                continue
+            visited.append((task.name, str(ptcondition),str(state), plan))
+            M = [(self.name, theta) for theta in pattern_match(ptcondition, index, substitutions)] # Find if method's precondition is satisfied for state
+            if debug:
+                print(f"Task: {task.head}\nPreconditions: {self.preconditions}\nState: {state}\nSubstitutions: {substitutions}\nApplicable Operators: {M}\n\n")
+            if M:
+                m, theta = choice(M)
+                return msubst(theta, self.subtasks)
         return False
 
     def __str__(self):
@@ -115,7 +113,7 @@ class Operator:
         for ptcondition in ptconditions:
             A = [(self.name, theta) for theta in pattern_match(ptcondition, index, substitutions)] # Find if operator's precondition is satisfied for state
             if debug:
-                    print("Task: {}\nPrecondition: {}\nState: {}\nSubstitutions: {}\nApplicable Operators: {}\n\n".format(task.head, self.precondition, state, substitutions, A))
+                    print(f"Task: {task.head}\nPrecondition: {self.preconditions}\nState: {state}\nSubstitutions: {substitutions}\nApplicable Operators: {A}\n\n")
             if A:
                 a, theta = choice(A)
                 for effect in chain(add_effects, del_effects):
@@ -124,7 +122,8 @@ class Operator:
                             cond.value = tuple([f'?{x.name}' if isinstance(x, V) else x for x in cond.value])
                         effect[cond.attribute] = execute_functions(cond.value,theta) if not isinstance(cond.value, V) \
                                                         else subst(theta, cond.value)
-                return (del_effects, add_effects) # Return the add and delete effects of the operator
+                grounded_args = tuple([theta[f'?{v.name}'] for v in self.args if f'?{v.name}' in theta])
+                return grounded_args
         return False
     
     def __str__(self):
