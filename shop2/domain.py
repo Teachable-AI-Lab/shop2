@@ -2,6 +2,7 @@ from random import choice
 import inspect
 from itertools import chain
 from typing import List, Tuple, Set, Dict, Union
+from dataclasses import dataclass
 from py_plan.unification import is_variable, unify_var
 from py_plan.unification import execute_functions
 from py_plan.pattern_matching import build_index, pattern_match
@@ -106,12 +107,30 @@ class Operator:
             del_effects.add(effect.duplicate())
 
         ptstate = fact2tuple(state, variables=False)[0]
+        for fact in state:
+            print([(type(y), y) for x,y in fact.items()])
+        print("CONDS")
+        for condition in self.preconditions:
+            print([(type(y), y) for x,y in condition.items()])
+        print([(type(y), y) for y in task.head[1:]])
+        print("\n\n\nFACT_STATE", state)
+        print("TUPLE_STATE", ptstate)
+        print("FACT_COND", self.preconditions)
         index = build_index(ptstate)
         
         substitutions = unify(task.head, self.head)
+        
+        print("SUBS: ", substitutions)
+        print(len(self.preconditions))
+        # print(task.head)
+        # print(self.head)
+        if len(self.preconditions) == 0:
+            return task.head[1:]
         ptconditions = fact2tuple(self.preconditions, variables=True)
         for ptcondition in ptconditions:
+            print("TUPLE_CONDS: ", ptcondition)
             A = [(self.name, theta) for theta in pattern_match(ptcondition, index, substitutions)] # Find if operator's precondition is satisfied for state
+            print("A: ", A)
             if debug:
                     print(f"Task: {task.head}\nPrecondition: {self.preconditions}\nState: {state}\nSubstitutions: {substitutions}\nApplicable Operators: {A}\n\n")
             if A:
@@ -137,17 +156,26 @@ class Operator:
         return f"<Operator {self.name}>" 
     
 
-class Task:
-    def __init__(self,*args):
-        self.name = args[0]
-        self.args = args[1:]
-        self.head = (self.name, *self.args)
+# class Task:
+#     def __init__(self,*args):
+#         self.name = args[0]
+#         self.args = args[1:]
+#         self.head = (self.name, *self.args)
         
-    def __str__(self):
-        return f"Task(name='{self.name}', args={self.args})"
+#     def __str__(self):
+#         return f"Task(name='{self.name}', args={self.args})"
 
-    def __repr__(self):
-        return f"<Task {self.name}>"
+#     def __repr__(self):
+#         return f"<Task {self.name}>"
+
+@dataclass(eq=True, frozen=True)
+class Task:
+    name: str
+    args: Tuple[Union[str, V], ...]
+
+    @property
+    def head(self):
+        return (self.name, *self.args)
     
 def msubst(theta: Dict, tasks: Union[Task, List, Tuple]) -> Union[Task, List, Tuple]:
     """

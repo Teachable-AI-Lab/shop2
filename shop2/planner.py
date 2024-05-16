@@ -63,13 +63,21 @@ def planner(state: Fact, T: Union[List, Tuple], D: Dict, debug=False) -> Union[L
     plan = []
     stack, inner_visited, outer_visited = [], [], [] # used for backtracking from invalid plan
     while True:
+        print()
         if not T:
-            return (True, True) 
+            break
+            # return (True, True) 
+        print("T: ", T)
         T0 = getT0(T)
         task = choice(T0) # non-deterministic choice
         success = False
         key = f"{ task.name }/{ len(task.args) }"
+        print("KEY: ", key)
+        print("DOMAIN\n", D)
         for action in D[key]:
+            print("CONSIDERED ACTION: ", action)
+            for xx in state:
+                print("STATE: ", xx)
             if isinstance(action, Operator):
                 if (result := action.applicable(task, state, debug=debug)):
                     success, state = yield (action.name, result)
@@ -98,7 +106,7 @@ def planner(state: Fact, T: Union[List, Tuple], D: Dict, debug=False) -> Union[L
                 T, plan, state = stack.pop()
                 state = AND(*flatten(state))
             else:
-                return (False, False)
+                raise FailedPlanException(message="No valid plan found")
                 
 
 class FailedPlanException(Exception):
