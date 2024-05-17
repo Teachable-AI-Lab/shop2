@@ -4,7 +4,6 @@ from dataclasses import dataclass
         - Why is fields at the top? is it mutable?
             - seems to be used in other functions to get the field names
 """
-from __future__ import annotations
 
 variable_counter = 0
 
