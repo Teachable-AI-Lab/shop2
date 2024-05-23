@@ -1,5 +1,5 @@
 from shop2.domain import Task, Operator, Method
-from shop2.planner import SHOP2
+from shop2.planner import planner, StopException, FailedPlanException
 from shop2.fact import Fact
 from shop2.common import V
 from shop2.conditions import Filter, NOT
@@ -87,37 +87,44 @@ Domain = {
                                     
         "solve/0":  [
             Method(head=('solve',),
-                   preconditions=Fact(field=V('op'), operator='*'),
+                   preconditions=[],
                    subtasks=[Task('mult',)]
             ),
             Method(head=('solve',),
-                   preconditions=Fact(field=V('op'), operator='+'),
+                   preconditions=Fact(field=V('op'), operator='-'),
                    subtasks=[Task('add',)]
             ),
+
+            Operator(head=('solve',),
+                     preconditions=[],
+                     effects=Fact(field=V('op'), operator='+'))
         ],
 }
 
 
 if __name__ == "__main__":
 
-    numerator_x, numerator_y = 2, 5
-    denominator_x, denominator_y = 6, 5
-    operator = "+"
-    state = (Fact(field='op', operator=operator)&
-             Fact(field='xn', value=numerator_x)&
-             Fact(field='yn', value=numerator_y)&
-             Fact(field='xd', value=denominator_x)&
-             Fact(field='yd', value=denominator_y))
+       numerator_x, numerator_y = 2, 5
+       denominator_x, denominator_y = 6, 5
+       operator = "+"
+       state = (Fact(field='op', operator=operator)&
+              Fact(field='xn', value=numerator_x)&
+              Fact(field='yn', value=numerator_y)&
+              Fact(field='xd', value=denominator_x)&
+              Fact(field='yd', value=denominator_y))
     
-    Tasks = [Task('solve',)]
+       Tasks = [Task('solve',)]
+       plan = planner(state, Tasks, Domain)
 
-#     if result := SHOP2(state, Tasks, Domain, debug=False): 
-#         plan, nstate = result
-#         print(plan)
-#         print(state)
-#         print(nstate)
-#     else:
-#         print("No plan found")
+       # try: 
+       #        action_name, action_args = plan.send(None)
+       #        while True:
+       #               action_name, action_args = plan.send((True, state))
+       # except StopIteration as e: 
+       #        print(True)
+       # except FailedPlanException as e:
+       #        print(e)
+
 
 
     

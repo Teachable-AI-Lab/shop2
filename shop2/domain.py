@@ -46,7 +46,7 @@ class Method:
         self.subtasks = subtasks
         self.cost = cost # TODO cost = sum of costs of operators in subtasks
 
-    def applicable(self, task, state, plan, visited, debug=False):
+    def applicable(self, task, state, plan, visited):
         ptstate = fact2tuple(state, variables=False)[0]
         index = build_index(ptstate)
         substitutions = unify(task.head, self.head)
@@ -56,18 +56,17 @@ class Method:
                 continue
             visited.append((task.name, str(ptcondition),str(state), plan))
             M = [(self.name, theta) for theta in pattern_match(ptcondition, index, substitutions)] # Find if method's precondition is satisfied for state
-            if debug:
-                print(f"Task: {task.head}\nPreconditions: {self.preconditions}\nState: {state}\nSubstitutions: {substitutions}\nApplicable Operators: {M}\n\n")
             if M:
                 m, theta = choice(M)
                 return msubst(theta, self.subtasks)
+        if not self.preconditions:
+            return msubst(substitutions, self.subtasks)
         return False
 
     def __str__(self):
         s = f"Name: {self.name}\n"
         s += f"Preconditions: {self.preconditions}\n"
         s += f"Subtasks: {self.subtasks}\n"
-        s += f"Cost: {self.cost:.2f}\n"
         return s
 
     def __repr__(self):
@@ -99,7 +98,7 @@ class Operator:
                 else:
                     self.add_effects.add(e)
 
-    def applicable(self, task, state, debug=False):
+    def applicable(self, task, state):
         add_effects, del_effects = set(), set()
         for effect in self.add_effects:
             add_effects.add(effect.duplicate())
@@ -107,71 +106,37 @@ class Operator:
             del_effects.add(effect.duplicate())
 
         ptstate = fact2tuple(state, variables=False)[0]
-        for fact in state:
-            print([(type(y), y) for x,y in fact.items()])
-        print("CONDS")
-        for condition in self.preconditions:
-            print([(type(y), y) for x,y in condition.items()])
-        print([(type(y), y) for y in task.head[1:]])
-        print("\n\n\nFACT_STATE", state)
-        print("TUPLE_STATE", ptstate)
-        print("FACT_COND", self.preconditions)
-        index = build_index(ptstate)
-        
+        index = build_index(ptstate)        
         substitutions = unify(task.head, self.head)
-        
-        print("SUBS: ", substitutions)
-        print(len(self.preconditions))
-        # print(task.head)
-        # print(self.head)
-        if len(self.preconditions) == 0:
-            return task.head[1:]
         ptconditions = fact2tuple(self.preconditions, variables=True)
         for ptcondition in ptconditions:
-            print("TUPLE_CONDS: ", ptcondition)
-            A = [(self.name, theta) for theta in pattern_match(ptcondition, index, substitutions)] # Find if operator's precondition is satisfied for state
-            print("A: ", A)
-            if debug:
-                    print(f"Task: {task.head}\nPrecondition: {self.preconditions}\nState: {state}\nSubstitutions: {substitutions}\nApplicable Operators: {A}\n\n")
+            A = [(self.name, theta) for theta in pattern_match(ptcondition, index, substitutions)]
             if A:
                 a, theta = choice(A)
-                for effect in chain(add_effects, del_effects):
-                    for cond in effect.conds:
-                        if isinstance(cond.value, tuple) and callable(cond.value[0]):
-                            cond.value = tuple([f'?{x.name}' if isinstance(x, V) else x for x in cond.value])
-                        effect[cond.attribute] = execute_functions(cond.value,theta) if not isinstance(cond.value, V) \
-                                                        else subst(theta, cond.value)
-                grounded_args = tuple([theta[f'?{v.name}'] for v in self.args if f'?{v.name}' in theta])
-                return grounded_args
+                grounded_args = tuple([theta[f'?{v.name}'] for v in self.args if f'?{v.name}' in theta]) 
+                return (self.name, grounded_args)            
+        if not self.preconditions:
+            grounded_args = tuple([substitutions[f'?{v.name}'] for v in self.args if f'?{v.name}' in substitutions])
+            return  (self.name, grounded_args)
         return False
     
     def __str__(self):
         s = f"Name: {self.name}\n"
         s += f"Preconditions: {self.preconditions}\n"
         s += f"Effects: {self.effects}\n"
-        s += f"Cost: {self.cost:.2f}\n"
         return s
 
     def __repr__(self):
         return f"<Operator {self.name}>" 
-    
 
-# class Task:
-#     def __init__(self,*args):
-#         self.name = args[0]
-#         self.args = args[1:]
-#         self.head = (self.name, *self.args)
-        
-#     def __str__(self):
-#         return f"Task(name='{self.name}', args={self.args})"
-
-#     def __repr__(self):
-#         return f"<Task {self.name}>"
-
-@dataclass(eq=True, frozen=True)
+@dataclass(eq=True)
 class Task:
     name: str
     args: Tuple[Union[str, V], ...]
+
+    def __init__(self, name: str, *args: Union[str, 'V']):
+        self.name = name
+        self.args = args
 
     @property
     def head(self):
