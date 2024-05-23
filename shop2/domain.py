@@ -50,6 +50,8 @@ class Method:
         ptstate = fact2tuple(state, variables=False)[0]
         index = build_index(ptstate)
         substitutions = unify(task.head, self.head)
+        if not self.preconditions:
+            return msubst(substitutions, self.subtasks)
         ptconditions = fact2tuple(self.preconditions, variables=True)
         for ptcondition in ptconditions:
             if (task.name, str(ptcondition), str(state), plan) in visited:
@@ -59,8 +61,7 @@ class Method:
             if M:
                 m, theta = choice(M)
                 return msubst(theta, self.subtasks)
-        if not self.preconditions:
-            return msubst(substitutions, self.subtasks)
+
         return False
 
     def __str__(self):
@@ -108,16 +109,16 @@ class Operator:
         ptstate = fact2tuple(state, variables=False)[0]
         index = build_index(ptstate)        
         substitutions = unify(task.head, self.head)
+        if not self.preconditions:
+            grounded_args = tuple([substitutions[f'?{v.name}'] for v in self.args if f'?{v.name}' in substitutions])
+            return  (self.name, grounded_args)
         ptconditions = fact2tuple(self.preconditions, variables=True)
         for ptcondition in ptconditions:
             A = [(self.name, theta) for theta in pattern_match(ptcondition, index, substitutions)]
             if A:
                 a, theta = choice(A)
                 grounded_args = tuple([theta[f'?{v.name}'] for v in self.args if f'?{v.name}' in theta]) 
-                return (self.name, grounded_args)            
-        if not self.preconditions:
-            grounded_args = tuple([substitutions[f'?{v.name}'] for v in self.args if f'?{v.name}' in substitutions])
-            return  (self.name, grounded_args)
+                return (self.name, grounded_args)
         return False
     
     def __str__(self):
