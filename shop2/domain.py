@@ -129,14 +129,14 @@ class Operator:
     def __repr__(self):
         return f"<Operator {self.name}>" 
 
-@dataclass(eq=True)
+@dataclass(eq=True, frozen=True)
 class Task:
     name: str
-    args: Tuple[Union[str, V], ...]
+    args: Tuple[Union[str, 'V'], ...]
 
     def __init__(self, name: str, *args: Union[str, 'V']):
-        self.name = name
-        self.args = args
+        object.__setattr__(self, 'name', name)
+        object.__setattr__(self, 'args', args)
 
     @property
     def head(self):
