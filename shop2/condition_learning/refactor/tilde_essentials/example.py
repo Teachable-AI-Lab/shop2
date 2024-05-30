@@ -18,6 +18,13 @@ class Example(Destructible):
         if callable(destruct_method):
             self.data.destruct()
 
+    def __eq__(self, other):
+        # return self.data == other.data
+        return self.__hash__() == other.__hash__()
+
+    def __hash__(self):
+        return hash(str(self.data))
+
 
 def get_labels(examples: Iterable):
     labels = set()
