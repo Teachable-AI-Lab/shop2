@@ -1,46 +1,81 @@
 from copy import deepcopy
 from random import choice
-from typing import List, Tuple, Set, Dict, Union
-from shop2.domain import Task, Axiom, Method 
-from shop2.utils import replaceHead, replaceTask, removeTask, getT0
+from typing import List, Tuple, Set, Dict, Union, Generator
+from shop2.domain import Task, Axiom, Method, flatten, Operator
+from shop2.utils import replaceHead, replaceTask, removeTask, getT0, generatePermute
+from shop2.fact import Fact
+from shop2.conditions import AND
 
-def SHOP2(state: Set, T: Union[List, Tuple], D: Dict, debug=False) -> Union[List, Tuple, bool]:
-    """
-    Implementation of the SHOP2 algorithm. Returns a plan and 
-    the final state if viable plan is possible, otherwise returns 
-    False.
-    """
-    plan = deepcopy(T)
-    stack, visited = list(), list() # used for backtracking from invalid plan
+
+def planner(state: Fact, T: Union[List, Tuple], D: Dict):
+    plan = []
+    stack, inner_visited, outer_visited = [], [], []
     while True:
         if not T:
-            return plan, state 
-        for axiom in D.get('axioms', []):
-            state = axiom.applicable(state)
+            raise StopException(plan)
         T0 = getT0(T)
-        task = choice(T0) # non-deterministic choice
-        if task.primitive:
-            if (result := D[task.name].applicable(task, state, debug=debug)):
-                dels, adds = result
-                state = state.difference(dels).union(adds)
-                T = removeTask(T, task)
+        task = choice(T0) 
+        success = False
+        key = f"{ task.name }/{ len(task.args) }"
+        for action in D[key]:
+            if isinstance(action, Operator):
+                if (result := action.applicable(task, state)):
+                    success, state = yield result
+                    if success:
+                        T = removeTask(T, task)
+                        plan.append(action)
+                    break
+
+            elif isinstance(action, Method):
+                if (result := action.applicable(task, state, str(plan), inner_visited)):
+
+                    stack.append((deepcopy(T), deepcopy(plan), deepcopy(state)))
+                    subtask = result
+                    T = type(T)([subtask])+removeTask(T, task)
+                    success = True
+                    break
+            
+            if (str(action.head), str(action.preconditions), str(state)) in outer_visited:
+                break
             else:
-                if stack: # backtrack
-                    if debug:
-                        print("Backtracking...")
-                    T, plan, state = stack.pop()
-                else:
-                    return False
-        else:
-            if (result := D[task.name].applicable(task, state, str(plan), visited, debug=debug)):
-                stack.append((deepcopy(T), deepcopy(plan), deepcopy(state)))
-                subtask = result
-                plan = replaceTask(plan, task, subtask)
-                T = type(T)([subtask])+removeTask(T, task)
+                outer_visited.append((str(action.head), str(action.preconditions), str(state)))
+
+        if not success:
+            if stack: 
+                T, plan, state = stack.pop()
+                state = AND(*flatten(state))
             else:
-                if stack: # backtrack
-                    if debug:
-                        print("Backtracking...")
-                    T, plan, state = stack.pop()
-                else:
-                    return False
+                raise FailedPlanException(message="No valid plan found")
+                
+
+class StopException(Exception):
+    """Exception raised for errors in the execution of a plan.
+
+    Attributes:
+        plan -- the plan that caused the error
+        message -- explanation of the error
+    """
+
+    def __init__(self, plan=None, message="Task Completed"):
+        self.plan = plan
+        self.message = message
+        super().__init__(self.message)
+
+    def __str__(self):
+        return f'{self.plan} -> {self.message}'
+    
+class FailedPlanException(Exception):
+    """Exception raised for errors in the execution of a plan.
+
+    Attributes:
+        plan -- the plan that caused the error
+        message -- explanation of the error
+    """
+
+    def __init__(self, plan=None, message="The plan execution failed"):
+        self.plan = plan
+        self.message = message
+        super().__init__(self.message)
+
+    def __str__(self):
+        return f'{self.plan} -> {self.message}'

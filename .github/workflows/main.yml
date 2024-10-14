@@ -18,6 +18,6 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
-      run: pip install git+https://github.com/Teachable-AI-Lab-TAIL/shop2.git
+      run: pip install git+https://github.com/Teachable-AI-Lab-TAIL/shop2.git@facts
     - name: Run script
       run: python run.py
