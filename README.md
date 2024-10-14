@@ -61,21 +61,10 @@ solve = [Task('solve',)]
 For further details refer to run.py.
 
 ## Planner
-
-### SHOP2
-The planner SHOP2 requires state, tasks, and the domain description as arguments. There is an optional debug argument, which provides verbose details of the planner, enabling robust debugging.
-
-```python
-from shop2.planner import SHOP2
-
-state = Fact(field='num_x', value=10)&Fact(field='den_x',value=12)
-Tasks = [Task(head=('fracAdd',), primitive=False)]
-Domain = {...}
-plan = SHOP2(state=state, T=Tasks, D=Domain)
-```
 ### Coroutine Planner
 The coroutine planner waits for you to send some data to the generator. In order for the generator to terminate, it at StopException or FailedPlanException. Checkout run.py for more details.
 ```python
+from shop2.planner import planner,
 state = Fact(field='num_x', value=10)&Fact(field='den_x',value=12)
 Tasks = [Task('fracAdd',)]
 plan = planner(state, Tasks, Domain)
