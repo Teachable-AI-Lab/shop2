@@ -21,7 +21,7 @@ for more details.
 ```
 git clone https://github.com/Teachable-AI-Lab-TAIL/shop2.git
 
-pip install git+https://github.com/Teachable-AI-Lab-TAIL/shop2.git@facts
+pip install git+https://github.com/Teachable-AI-Lab-TAIL/shop2.git
 ```
 
 ## Domain Description
