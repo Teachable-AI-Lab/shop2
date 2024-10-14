@@ -87,20 +87,31 @@ Domain = {
                                     
         "solve/0":  [
             Method(head=('solve',),
-                   preconditions=[],
+                   preconditions=Fact(field=V('op'), operator='*'),
                    subtasks=[Task('mult',)]
             ),
             Method(head=('solve',),
-                   preconditions=Fact(field=V('op'), operator='-'),
+                   preconditions=Fact(field=V('op'), operator='+'),
                    subtasks=[Task('add',)]
             ),
 
-            Operator(head=('solve',),
-                     preconditions=[],
-                     effects=Fact(field=V('op'), operator='+'))
         ],
 }
 
+def helper_function(state, action_name, x, y, z):
+       x_value, y_value = None, None
+       for fact in state:
+              if fact['field'] == x:
+                     x_value = fact['value']
+              if fact['field'] == y:
+                     y_value = fact['value']
+
+       if action_name == 'intAdd':
+              z_value = x_value + y_value
+       elif action_name == 'intMult':
+              z_value = x_value * y_value
+       state = state & Fact(field=z, value=z_value)
+       return state
 
 if __name__ == "__main__":
 
@@ -112,18 +123,24 @@ if __name__ == "__main__":
               Fact(field='yn', value=numerator_y)&
               Fact(field='xd', value=denominator_x)&
               Fact(field='yd', value=denominator_y))
+       
     
        Tasks = [Task('solve',)]
        plan = planner(state, Tasks, Domain)
 
-       # try: 
-       #        action_name, action_args = plan.send(None)
-       #        while True:
-       #               action_name, action_args = plan.send((True, state))
-       # except StopIteration as e: 
-       #        print(True)
-       # except FailedPlanException as e:
-       #        print(e)
+       try: 
+              action_name, action_args = plan.send(None)
+              # Call helper functions to perform action_name over action_args to change state
+              state = helper_function(state, action_name, *action_args)
+              
+              while True:
+                     action_name, action_args = plan.send((True, state))
+                     # Call helper functions to perform action_name over action_args to change state
+                     state = helper_function(state, action_name, *action_args)
+       except StopException as e: 
+              print(e)
+       except FailedPlanException as e:
+              print(e)
 
 
 

@@ -18,10 +18,8 @@ def planner(state: Fact, T: Union[List, Tuple], D: Dict):
         success = False
         key = f"{ task.name }/{ len(task.args) }"
         for action in D[key]:
-            print(key, action.preconditions)
             if isinstance(action, Operator):
                 if (result := action.applicable(task, state)):
-                    print("RESULT", result)
                     success, state = yield result
                     if success:
                         T = removeTask(T, task)
@@ -30,7 +28,7 @@ def planner(state: Fact, T: Union[List, Tuple], D: Dict):
 
             elif isinstance(action, Method):
                 if (result := action.applicable(task, state, str(plan), inner_visited)):
-                    print("RESULT", result)
+
                     stack.append((deepcopy(T), deepcopy(plan), deepcopy(state)))
                     subtask = result
                     T = type(T)([subtask])+removeTask(T, task)
