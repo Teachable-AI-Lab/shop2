@@ -9,8 +9,7 @@ This project implements [SHOP2 (Simple Hierarchical Ordered Planner No. 2)](http
 ## Features
 - **Horn Clause Inference Engine**: Utilizes a Horn clause logic system, allowing for efficient and logical problem-solving capabilities.
 - **Partial Ordering**: Using tuples (unordered) and lists (ordered), the system represents partial ordering within the plan.
-- **Facts**: Supports a Fact notation. For an overview of facts, review [this link](https://github.com/cmaclell/py_rete). Note that the conditions described in the "Productions" section is analogous to   
-             preconditions described in this project and so the functionality is the same.
+- **Facts**: Supports a Fact notation. For an overview of facts, review [this link](https://github.com/cmaclell/py_rete). Note that the conditions described in the "Productions" section is analogous to preconditions described in this project and so the functionality is the same.
 
 ## Prerequisites
 
@@ -39,17 +38,17 @@ from shop2.domain import Task
 solve_task = Task('fraction_mult',)
 ```
 
-This example shows a task for adding two numbers. It specifies a name and takes two variablized arguments, namely the values of the numbers to be added. They are variablized to ensure the task is generalizable to future add problems.
+This example shows a task for adding two numbers. It specifies a name and takes three variablized arguments, namely the field names containing the numbers to be added (a and b) and the field name of the answer box to put the result in.
 ```python
 from shop2.domain import Task
 
-add_task = Task('add', V('a'), V('b'))
+add_task = Task('add', V('a'), V('b'), V('c'))
 ```
 
 ### Method
-Methods are what add hierarchy to HTNs and decompose tasks into subtasks. Methods consists of a _head_, a set of _preconditions_, and a list of _subtasks_. The head defines the task the method achieves as well as any variables to be passed in. The preconditions define a set of _Facts_ that must be true in the world state for this method to be applicable. Finally, subtasks are represented by a list of Task objects.
+Methods are what add hierarchy to HTNs and decompose tasks into subtasks. Methods consists of a _head_, a set of _preconditions_, and a list of _subtasks_. The head defines the task the method achieves as well as any arguments to be passed in. The preconditions define a set of _Facts_ that must be true in the world state for this method to be applicable. Finally, subtasks are represented by a list of Task objects.
 
-The below example shows a method for completing a fraction multiplication problem where there are two fraction operands. We see that the methods decomposes the task of solving a fraction multiplcation problem into the two tasks of multiplying the numerators and then the denominators, respectively. 
+The below example shows a method for completing a fraction multiplication problem where there are two fraction operands. We see that the method decomposes the task of solving a fraction multiplcation problem into the two tasks of multiplying the numerators and then the denominators, respectively. 
 ```python
 from shop2.common import V
 from shop2.domain import Method
@@ -65,9 +64,9 @@ fraction_mult_method = Method(head=('fraction_mult', V('num1'), V('num2'), V('de
 ```
 
 ### Operator
-Operators define the fundamental actions the planning system can take. Operators consist of a head, a set of preconditions, and and a set of _effects_ that result from the application of an operator. The effects, in this implementation, are currently not used but will be revisited in the near future.
+Operators define the fundamental actions the planning system can take. Operators consist of a head, a set of preconditions, and a set of _effects_ that result from the application of an operator. The effects, in this implementation, are currently not used but will be revisited in the near future.
 
-The below example shows an HTN operator for multiplying two numbers in a web-based, tutoring system interface. The operator expects 3 parameterized arguments: f1 and f2 (the field names containing the two values to multiply) and f3 (the field name of the interface element to put the result). The preconditions will match against the two fields in the tutor interface (f1 and f2) and their corresponding values (vf1 and vf2). The effects use these bindings to calculate the result of the multiplication and return this as an effect. 
+The below example shows an HTN operator for multiplying two numbers in a web-based, tutoring system interface. The operator expects 3 variablized arguments: f1 and f2 (the field names containing the two values to multiply) and f3 (the field name of the interface element to put the result). The preconditions will match against the two fields in the tutor interface (f1 and f2) and their corresponding values (vf1 and vf2). The effects use these bindings to calculate the result of the multiplication and return this as an effect. 
 ```python
 from shop2.common import V
 from shop2.domain import Operator
@@ -80,7 +79,7 @@ multiply_op = Operator(head=('multiply', V('f1'), V('f2'), V('f3')),
 ```
 
 ### Axioms
-Axioms are not currently documented.
+Axioms are implemented but not currently documented. See shop2/domain.py.
 
 
 In this project, the domain description is represented by a dictionary where the keys specify tasks and the number of arguments (e.g. `multiply/2`) and the values are a list of relevant methods or operators. For an example of a domain and additional examples of tasks, methods, and operators, refer to [run.py](https://github.com/Teachable-AI-Lab/shop2/blob/main/run.py). 
