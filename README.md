@@ -103,7 +103,7 @@ fraction_mult_method = Method(head=('fraction_mult',),
                                              Filter(lambda denom1, denom2: denom1 != denom2)),
                               subtasks=[Task('multiply', 'num1_val', 'num2_val', 'ans_num'), Task('multiply', 'denom1_val', 'denom2_val', 'ans_denom')]
             )
-
+```
 #### Logical Operators
 There are multiple ways to combine facts to create complex preconditions. 
 **AND**: To specify that a set of facts must **all** match to the world state in order for a precondition to be met, you can use the shop2.conditions.AND class or the ampersand (&) operator:
