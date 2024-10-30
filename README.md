@@ -54,12 +54,12 @@ from shop2.common import V
 from shop2.domain import Method
 from shop2.fact import Fact
 
-fraction_mult_method = Method(head=('fraction_mult', V('num1'), V('num2'), V('denom1'), V('denom2')),
-                              preconditions=(Fact(field=V('num1'), value=V('num1_val'))&
-                                             Fact(field=V('num2'), value=V('num2_val'))&
-                                             Fact(field=V('denom1'), value=V('denom1_val'))&
+fraction_mult_method = Method(head=('fraction_mult',),
+                              preconditions=(Fact(field=V('num1'), value=V('num1_val')) &
+                                             Fact(field=V('num2'), value=V('num2_val')) &
+                                             Fact(field=V('denom1'), value=V('denom1_val')) &
                                              Fact(field=V('denom2'), value=V('denom2_val'))),
-                              subtasks=[Task('multiply', 'num1', 'num2', 'ans_num'), Task('multiply', 'denom1', 'denom2', 'ans_denom')]
+                              subtasks=[Task('multiply', 'num1_val', 'num2_val', 'ans_num'), Task('multiply', 'denom1_val', 'denom2_val', 'ans_denom')]
             ),
 ```
 #### Facts
@@ -87,7 +87,22 @@ and using this fact as a precondition for a method would match the given world s
 ```
 precondition = Fact(type="circle", color="blue", size="small") & Fact(type="triangle")
 ```
-Note that the second fact did not need to specify all attributes found in other shape objects. Essentially, the previous precondition says to match when "there is a small, blue circle and a triangle" in the state (color and size of triangle does not matter).  
+Note that the second fact did not need to specify all attributes found in other shape objects. Essentially, the previous precondition says to match when "there is a small, blue circle and a triangle" in the state (color and size of triangle does not matter).
+
+#### Filters
+It is also possible to employ functional tests (lambdas or functions) using `Filter` conditions. Filter conditions allow you to filter out matches by defining rules on variables defined in facts that come before.
+For example, we will modify the preconditions of the fraction multiplication method to ensure that the two numerator conditions do not match to the same numerator field (and same for the denominators):
+
+```
+fraction_mult_method = Method(head=('fraction_mult',),
+                              preconditions=(Fact(field=V('num1'), value=V('num1_val')) &
+                                             Fact(field=V('num2'), value=V('num2_val')) &
+                                             Filter(lambda num1, num2: num1 != num2) &
+                                             Fact(field=V('denom1'), value=V('denom1_val')) &
+                                             Fact(field=V('denom2'), value=V('denom2_val')) &
+                                             Filter(lambda denom1, denom2: denom1 != denom2)),
+                              subtasks=[Task('multiply', 'num1_val', 'num2_val', 'ans_num'), Task('multiply', 'denom1_val', 'denom2_val', 'ans_denom')]
+            )
 
 #### Logical Operators
 There are multiple ways to combine facts to create complex preconditions. 
