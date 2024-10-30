@@ -62,6 +62,83 @@ fraction_mult_method = Method(head=('fraction_mult', V('num1'), V('num2'), V('de
                               subtasks=[Task('multiply', 'num1', 'num2', 'ans_num'), Task('multiply', 'denom1', 'denom2', 'ans_denom')]
             ),
 ```
+#### Facts
+Methods (and operators) use the Fact notation to define preconditions. Facts represent the basic units of knowledge that methods and operators use to match to a world state and generally represent an environment object in whole or in part. For example, given the following environment state in "shapes world" (a list of dictionary objects describing shapes):
+
+```
+state = [
+    {
+        "type": "circle",
+        "color": "blue",
+        "size": "small"
+      },
+    {
+        "type": "square",
+        "color": "red",
+        "size": "large"
+    }
+]
+```
+We can define a fact representing the first object as:
+```
+precondition = Fact(type="circle", color="blue", size="small")
+```
+and using this fact as a precondition for a method would match the given world state. If we instead define a precondition that requires another shape object, triangle, the precondition would no longer match (since the world state contains no triangles).
+```
+precondition = Fact(type="circle", color="blue", size="small") & Fact(type="triangle")
+```
+Note that the second fact did not need to specify all attributes found in other shape objects. Essentially, the previous precondition says to match when "there is a small, blue circle and a triangle" in the state (color and size of triangle does not matter).  
+
+#### Logical Operators
+There are multiple ways to combine facts to create complex preconditions. 
+**AND**: To specify that a set of facts must **all** match to the world state in order for a precondition to be met, you can use the shop2.conditions.AND class or the ampersand (&) operator:
+```
+precondition = AND((Fact(type="circle", color="blue", size="small"), Fact(type="triangle", color="blue", size="medium")))
+```
+or
+```
+precondition = Fact(type="circle", color="blue", size="small") & Fact(type="triangle", color="blue", size="medium")
+```
+**OR**:  To be documented soon.
+
+**NOT**: To be documented soon.
+
+Below are some examples of additional ways to define facts. 
+
+1. *Facts* are a subclass of dict, so you can treat them similar to dictionaries.
+
+```python
+>>> f = Fact(a=1, b=2)
+>>> f['a']
+1
+```
+
+2. *Facts* extend dictionaries, so they also support positional values without
+   keys. These values are assigned numerical indices based on their position.
+
+```python
+>>> f = Fact('a', 'b', 'c')
+>>> f[0]
+'a'
+```
+
+3. *Facts* can support mixed positional and named arguments, but positional
+   must come before named and named arguments do not get positional references.
+
+```python
+>>> f = Fact('a', 'b', c=3, d=4)
+>>> f[0]
+'a'
+>>> f['c']
+3
+```
+
+5. *Facts* support nesting with other facts. 
+
+```python
+>>> f = Fact(subfact=Fact())
+Fact(subfact=Fact())
+```
 
 ### Operator
 Operators define the fundamental actions the planning system can take. Operators consist of a head, a set of preconditions, and a set of _effects_ that result from the application of an operator. The effects, in this implementation, are currently not used but will be revisited in the near future.
