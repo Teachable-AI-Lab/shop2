@@ -59,7 +59,7 @@ fraction_mult_method = Method(head=('fraction_mult',),
                                              Fact(field=V('num2'), value=V('num2_val')) &
                                              Fact(field=V('denom1'), value=V('denom1_val')) &
                                              Fact(field=V('denom2'), value=V('denom2_val'))),
-                              subtasks=[Task('multiply', 'num1_val', 'num2_val', 'ans_num'), Task('multiply', 'denom1_val', 'denom2_val', 'ans_denom')]
+                              subtasks=[Task('multiply', V('num1_val'), V('num2_val')), Task('multiply', V('denom1_val'), V('denom2_val'))]
             ),
 ```
 #### Facts
@@ -101,7 +101,7 @@ fraction_mult_method = Method(head=('fraction_mult',),
                                              Fact(field=V('denom1'), value=V('denom1_val')) &
                                              Fact(field=V('denom2'), value=V('denom2_val')) &
                                              Filter(lambda denom1, denom2: denom1 != denom2)),
-                              subtasks=[Task('multiply', 'num1_val', 'num2_val', 'ans_num'), Task('multiply', 'denom1_val', 'denom2_val', 'ans_denom')]
+                              subtasks=[Task('multiply', V('num1_val'), V('num2_val')), Task('multiply', V('denom1_val'), V('denom2_val'))]
             )
 ```
 #### Logical Operators
