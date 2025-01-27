@@ -232,33 +232,14 @@ def fact2tuple(facts, variables=False):
         all_tuple_state.append(tuple_state)
     return all_tuple_state
 
-def flatten(struct):
-    if not isinstance(struct, (list, tuple)) or isinstance(struct, NOT):
-        return struct
-    # Flatten a list if it contains another list as its element
-    if isinstance(struct, list):
-        flattened = []
-        for item in struct:
-            result = flatten(item)
-            if isinstance(item, list):
-                flattened.extend(result)  # Extend to flatten the list
-            else:
-                flattened.append(result)
-        return flattened
-    
-    # Flatten a tuple if it contains another tuple as its element
-    elif isinstance(struct, tuple):
-        flattened = []
-        for item in struct:
-            result = flatten(item)
-            if isinstance(item, tuple):
-                flattened.extend(result)  # Extend to flatten the tuple
-            else:
-                flattened.append(result)
-        return tuple(flattened)
-    
-    # Return the structure unchanged if it's neither a list nor a tuple
-    return struct
+def flatten(lst):
+    flat = []
+    for item in lst:
+        if isinstance(item, (list, tuple)):
+            flat.extend(flatten(item))
+        else:
+            flat.append(item)
+    return flat
 
 def expandAND(*args):
     # Base case: single element
