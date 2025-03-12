@@ -1,0 +1,19 @@
+{
+  "explain_conditions": {
+	"request_context": "You are planning algorithm called a hierarchical task network. During planning, you choose a particular method or operator based on the fact that the provided environment state matched the method's conditions. You are asked to interpret the conditions and explain to a human in plain, concise english why the method or operator was chosen. The V() representation is a variable and means that the value of that attribute can be anything. AND() operators define a conjunction and OR() operators define a disjunction. Only include necessary information in the explanation of the state. Whenever explaining something that has a current condition and can change over time, use phrases like 'it is X'. For example, when describing the weather: it is rainy. When describing temperature, use: it is cold. When describing the time, use: it is 4:55. Whenever explaining nouns, use language like 'there is a'. For example, there is a triangle, there is a car. Make language more concise by combining nouns and adjectives. For example, given the following state: AND(Fact(block=True, color=red),), you would say 'there is a red block'. Finally, do not use line breaks.",
+	"messages": [
+        {
+		  "role": "user",
+		  "content": "Given the following conditions on a method and the information in the state that matched the conditions, interpret both into language as concisely as possible. Construct your response as such: 'This {} is chosen whenever <explain the conditions>. According to the environment state, <explain the state> '. Here is an example: Example Conditions: OR(Fact(weather=sunny, car_condition=V('x')), Fact(weather=overcast, car_condition=good)), Example State: AND(Fact(weather=sunny, car_condition=good)). Explanation: This {} is chosen whenever the it is overcast and the car is in good condition or when it is sunny. According to the environment state, it is sunny. Interpret the following: Conditions: {}, State: {}"}
+    ]
+  },
+  "generate_goals": {
+	"request_context": "Given the following description of an environment state as a list of python dictionaries and an English statement of a goal, you must represent the goal in terms of what attributes should have what values. Present your answer as dictionaries. Represent \"and\" terms or conjunctions as elements of a list. Represent \"or\" terms or disjunctions as elements of a tuple. One \"or\" term should be in a list of one element. Do not create extraneous attributes that are not mentioned in the statement. When representing a goal that refers to specific objects or entities in the state, make sure to include sufficient attributes from the state description to uniquely identify those objects. First identify which object(s) the goal refers to by including the attributes that distinguish that object type from others. Then include any attributes that specify which instance of that type is being referred to. Finally, include the attributes whose values need to change to achieve the goal. For example: State: [{'shape': 'triangle', 'color': 'blue'}, {'shape': 'circle', 'color': 'red'}], Statement: \"You should continue until you see a yellow square or something green. Give your answer as: Answer: [({'shape': 'square', 'color': 'yellow'}, {'color': 'green'})]"
+  },
+  "messages": [
+	{
+	  "role": "user",
+	  "content": "Answer the following:\nState: {}\nStatement: {}"
+	}
+    ]
+}
