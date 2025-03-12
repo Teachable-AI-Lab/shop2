@@ -3,6 +3,7 @@ from collections import defaultdict
 import inspect
 from itertools import chain
 from typing import List, Tuple, Set, Dict, Union
+from uuid import uuid4
 from dataclasses import dataclass
 from py_plan.unification import is_variable, unify_var
 from py_plan.unification import execute_functions
@@ -42,6 +43,7 @@ class Method:
     As defined for Method in domain description of SHOP2
     """
     def __init__(self, head, preconditions, subtasks, unless_conditions=(), cost=1):
+        self.id = str(uuid4()).replace('-', '')
         self.head = head
         self.name = head[0]
         self.args = head[1:]
@@ -68,7 +70,15 @@ class Method:
             methods = [(self.name, theta) for theta in pattern_match(ptcondition, index, substitutions)]
             if methods:
                 m, theta = choice(methods)
-                return msubst(theta, self.subtasks)
+                return {
+                    'option_type': 'method',
+                    'id': self.name,
+                    'name': self.name,
+                    'grounded_subtasks': msubst(theta, self.subtasks),
+                    'matched_facts': tuples_to_dicts(subst(theta, tuple(ptcondition)),
+                                                     use_facts=True, use_and_operator=True)
+                }
+                # return msubst(theta, self.subtasks)
 
         return False
 
@@ -87,6 +97,7 @@ class Operator:
     As defined for Operator in domain description of SHOP2
     """
     def __init__(self, head, preconditions, effects, unless_conditions=(), cost=1):
+        self.id = str(uuid4()).replace('-', '')
         self.head = head
         self.name = head[0]
         self.args = head[1:]
@@ -123,12 +134,15 @@ class Operator:
             if actions:
                 a, theta = choice(actions)
                 grounded_args = tuple([theta[f'?{v.name}'] for v in self.args if f'?{v.name}' in theta])
-                return {'operator': self.name,
-                        'grounded_arguments': grounded_args,
-                        'matched_facts': tuples_to_dicts(subst(theta, tuple(ptcondition)),
-                                                         use_facts=True, use_and_operator=True),
-                        'effects': self.get_effects(theta),
-                        }
+                return {
+                    'option_type': 'method',
+                    'id': self.name,
+                    'name': self.name,
+                    'grounded_arguments': grounded_args,
+                    'matched_facts': tuples_to_dicts(subst(theta, tuple(ptcondition)),
+                                                     use_facts=True, use_and_operator=True),
+                    'effects': self.get_effects(theta)
+                    }
         return False
 
     def get_effects(self, theta):
@@ -166,8 +180,10 @@ class Task:
                  args: Union[Union[List[Union[str, 'V']], Tuple[Union[str, 'V']]]] = (),
                  priority: int = 1,
                  repeat: bool = False):
+        self.id = str(uuid4()).replace('-', '')
         self.name = name
         self.args = args
+        self.head = (self.name, *self.args)
         # index_chain keeps track of where task is in global task list for easier removal
         self.index_chain = None
         # Convert priority value if necessary
@@ -176,8 +192,8 @@ class Task:
             if priority in priority_map else priority
         self.repeat = repeat if repeat is not None else False
 
-    def head(self):
-        return self.name, *self.args
+    # def head(self):
+    #     return self.name, *self.args
 
     def __copy__(self):
         return self._copy()
@@ -210,7 +226,10 @@ def msubst(theta: Dict, tasks: Union[Task, List, Tuple]) -> Union[Task, List, Tu
     Perform substitutions theta on tasks across the structure (of lists and tuples).
     """
     if isinstance(tasks, Task):
-        return Task(*subst(theta, tasks.head))
+        print(tasks.head, type(tasks.head))
+        s = subst(theta, tasks.head)
+        print(s, type(s))
+        return Task(name=s[0], args=s[1:])
     else:
         return type(tasks)([msubst(theta, task) for task in tasks])
 

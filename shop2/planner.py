@@ -1,7 +1,9 @@
 from copy import deepcopy
+from json import dumps
 from itertools import chain, permutations
 from random import choice
 from time import sleep
+from typing import Any
 from typing import Dict
 from typing import Generator
 from typing import List
@@ -35,10 +37,10 @@ class Planner:
             # validate_state(state)
             validate_tasks(tasks)
 
-        self.coroutine = None
-        self.state = None
         self.tasks = []
         self.domain = domain
+        self.coroutine = None
+        self.state = None
 
         # Working memory
         self.wm = []
@@ -101,8 +103,8 @@ class Planner:
                 else sorted(self.domain[domain_key], key=lambda op: op.cost)
 
             for option in options:
-                print('option: ', option)
-                print(type(option))
+                # print(f'option: {type(option)}\n', option)
+                # print(f'State: {dumps(self.state, indent=2)}')
                 if isinstance(option, Operator):
                     if result := option.applicable(task, self.state):
                         # TODO if task repeats, should the plan reflect that or should it only track it once
@@ -127,12 +129,15 @@ class Planner:
                 elif isinstance(option, Method):
                     # option is applicable if state can be unified with method preconditions
                     if result := option.applicable(task, self.state, str(self.plan), inner_visited):
+                        # print(result)
                         stack.append((deepcopy(self.tasks), deepcopy(self.plan), deepcopy(self.state)))
-                        subtask = result
+                        subtasks = result['grounded_subtasks']
                         # T = type(T)([subtask]) + removeTask(T, task)
-                        self.tasks = [subtask] + self._remove_task(self.tasks, task)
+                        self.tasks = (subtasks if isinstance(subtasks, (list, tuple)) else [subtasks]) \
+                            + self._remove_task(self.tasks, task)
                         success = True
-                        self._add_plan_action(option, self.state)
+
+                        self._add_plan_action(domain_key, option, self.state, result['matched_facts'])
                         break
 
                 option_info = (str(option.head), str(option.preconditions), str(self.state))
@@ -280,13 +285,9 @@ class Planner:
             for p in self.plan:
                 pass
 
-
-
     @staticmethod
     def _print_plan(plan: List):
         return str(plan)
-
-
 
 
 class PlanAction:
@@ -329,12 +330,3 @@ class PlanAction:
 
     def _print_str(self):
         return f"{self.type}(sequence={self.id}, name={self.name}, args={self.args})"
-
-
-
-
-
-
-
-                
-
