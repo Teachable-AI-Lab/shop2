@@ -1,4 +1,5 @@
 from random import choice
+from collections import defaultdict
 import inspect
 from itertools import chain
 from typing import List, Tuple, Set, Dict, Union
@@ -6,10 +7,11 @@ from dataclasses import dataclass
 from py_plan.unification import is_variable, unify_var
 from py_plan.unification import execute_functions
 from py_plan.pattern_matching import build_index, pattern_match
-from py_plan.unification import execute_functions, unify
+from py_plan.unification import unify
 from shop2.fact import Fact
 from shop2.conditions import AND, OR, NOT, Filter
 from shop2.common import V
+
 
 class Axiom:
     """
@@ -33,21 +35,25 @@ class Axiom:
 
     def __repr__(self):
         return f"<Axiom {self.name}>" 
-    
+
+
 class Method:
     """
     As defined for Method in domain description of SHOP2
     """
-    def __init__(self, head, preconditions, subtasks, cost=1):
+    def __init__(self, head, preconditions, subtasks, unless_conditions=(), cost=1):
         self.head = head
         self.name = head[0]
         self.args = head[1:]
         self.preconditions = preconditions
+        self.unless_conditions = unless_conditions
         self.subtasks = subtasks
-        self.cost = cost # TODO cost = sum of costs of operators in subtasks
+        # TODO cost = sum of costs of operators in subtasks
+        self.cost = cost
 
     def applicable(self, task, state, plan, visited):
-        ptstate = fact2tuple(state, variables=False)[0]
+        # ptstate = fact2tuple(state, variables=False)[0]
+        ptstate = dict_to_tuple(state)
         index = build_index(ptstate)
         substitutions = unify(task.head, self.head)
         if not self.preconditions:
@@ -56,10 +62,12 @@ class Method:
         for ptcondition in ptconditions:
             if (task.name, str(ptcondition), str(state), plan) in visited:
                 continue
-            visited.append((task.name, str(ptcondition),str(state), plan))
-            M = [(self.name, theta) for theta in pattern_match(ptcondition, index, substitutions)] # Find if method's precondition is satisfied for state
-            if M:
-                m, theta = choice(M)
+            visited.append((task.name, str(ptcondition), str(state), plan))
+            # Find if method's precondition is satisfied by state
+            # Only checks one substitution, not all
+            methods = [(self.name, theta) for theta in pattern_match(ptcondition, index, substitutions)]
+            if methods:
+                m, theta = choice(methods)
                 return msubst(theta, self.subtasks)
 
         return False
@@ -72,16 +80,18 @@ class Method:
 
     def __repr__(self):
         return f"<Method {self.name}>" 
-    
+
+
 class Operator:
     """
     As defined for Operator in domain description of SHOP2
     """
-    def __init__(self, head, preconditions, effects, cost=1):
+    def __init__(self, head, preconditions, effects, unless_conditions=(), cost=1):
         self.head = head
         self.name = head[0]
         self.args = head[1:]
         self.preconditions = preconditions
+        self.unless_conditions = unless_conditions
         self.effects = effects
         self.cost = cost
 
@@ -100,26 +110,46 @@ class Operator:
                     self.add_effects.add(e)
 
     def applicable(self, task, state):
+        # ptstate = fact2tuple(state, variables=False)[0]
+        ptstate = dict_to_tuple(state)
+        index = build_index(ptstate)        
+        substitutions = unify(task.head, self.head)
+        if not self.preconditions:
+            grounded_args = tuple([substitutions[f'?{v.name}'] for v in self.args if f'?{v.name}' in substitutions])
+            return self.name, grounded_args, self.get_effects(substitutions)
+        ptconditions = fact2tuple(self.preconditions, variables=True)
+        for ptcondition in ptconditions:
+            actions = [(self.name, theta) for theta in pattern_match(ptcondition, index, substitutions)]
+            if actions:
+                a, theta = choice(actions)
+                grounded_args = tuple([theta[f'?{v.name}'] for v in self.args if f'?{v.name}' in theta])
+                return {'operator': self.name,
+                        'grounded_arguments': grounded_args,
+                        'matched_facts': tuples_to_dicts(subst(theta, tuple(ptcondition)),
+                                                         use_facts=True, use_and_operator=True),
+                        'effects': self.get_effects(theta),
+                        }
+        return False
+
+    def get_effects(self, theta):
         add_effects, del_effects = set(), set()
         for effect in self.add_effects:
             add_effects.add(effect.duplicate())
         for effect in self.del_effects:
             del_effects.add(effect.duplicate())
 
-        ptstate = fact2tuple(state, variables=False)[0]
-        index = build_index(ptstate)        
-        substitutions = unify(task.head, self.head)
-        if not self.preconditions:
-            grounded_args = tuple([substitutions[f'?{v.name}'] for v in self.args if f'?{v.name}' in substitutions])
-            return  (self.name, grounded_args)
-        ptconditions = fact2tuple(self.preconditions, variables=True)
-        for ptcondition in ptconditions:
-            A = [(self.name, theta) for theta in pattern_match(ptcondition, index, substitutions)]
-            if A:
-                a, theta = choice(A)
-                grounded_args = tuple([theta[f'?{v.name}'] for v in self.args if f'?{v.name}' in theta]) 
-                return (self.name, grounded_args)
-        return False
+        all_effects = []
+        for effect in chain(add_effects, del_effects):
+            # print(effect)
+            for cond in effect.conds:
+                # print('cond: ', cond)
+                if isinstance(cond.value, tuple) and callable(cond.value[0]):
+                    cond.value = tuple([f'?{x.name}' if isinstance(x, V) else x for x in cond.value])
+                effect[cond.attribute] = execute_functions(cond.value, theta) if not isinstance(cond.value, V) \
+                    else subst(theta, cond.value)
+            all_effects.append({k: effect[k] for k in effect})
+        # return add_effects, delete_effects
+        return all_effects
     
     def __str__(self):
         s = f"Name: {self.name}\n"
@@ -128,21 +158,53 @@ class Operator:
         return s
 
     def __repr__(self):
-        return f"<Operator {self.name}>" 
+        return f"<Operator {self.name}>"
 
-@dataclass(eq=True, frozen=True)
+
 class Task:
-    name: str
-    args: Tuple[Union[str, 'V'], ...]
+    def __init__(self, name: str,
+                 args: Union[Union[List[Union[str, 'V']], Tuple[Union[str, 'V']]]] = (),
+                 priority: int = 1,
+                 repeat: bool = False):
+        self.name = name
+        self.args = args
+        # index_chain keeps track of where task is in global task list for easier removal
+        self.index_chain = None
+        # Convert priority value if necessary
+        priority_map = {'first': 0, 'high': 1, 'medium': 2, 'low': 3}
+        self.priority = priority_map[priority] \
+            if priority in priority_map else priority
+        self.repeat = repeat if repeat is not None else False
 
-    def __init__(self, name: str, *args: Union[str, 'V']):
-        object.__setattr__(self, 'name', name)
-        object.__setattr__(self, 'args', args)
-
-    @property
     def head(self):
-        return (self.name, *self.args)
-    
+        return self.name, *self.args
+
+    def __copy__(self):
+        return self._copy()
+
+    def __deepcopy__(self, memodict={}):
+        return self._copy()
+
+    def __str__(self):
+        return self._get_str()
+
+    def __repr__(self):
+        return self._get_str()
+
+    def _get_str(self):
+        s = f"Task({self.name}"
+        if self.args:
+            for a in self.args:
+                s += f", {a}"
+        s += ")"
+        return s
+
+    def _copy(self):
+        new_task = Task(self.name, self.args, priority=self.priority)
+        new_task.index_chain = self.index_chain
+        return new_task
+
+
 def msubst(theta: Dict, tasks: Union[Task, List, Tuple]) -> Union[Task, List, Tuple]:
     """
     Perform substitutions theta on tasks across the structure (of lists and tuples).
@@ -151,7 +213,8 @@ def msubst(theta: Dict, tasks: Union[Task, List, Tuple]) -> Union[Task, List, Tu
         return Task(*subst(theta, tasks.head))
     else:
         return type(tasks)([msubst(theta, task) for task in tasks])
-  
+
+
 def subst(s, x):
     if isinstance(x, V):
         return subst(s, f'?{x.name}')
@@ -161,6 +224,7 @@ def subst(s, x):
         return tuple(subst(s, xi) for xi in x)
     else:
         return x
+
 
 def unify(x, y, s=(), check=False):
     """
@@ -197,6 +261,23 @@ def unify(x, y, s=(), check=False):
             return s
         return unify(x[1:], y[1:], unify(x[0], y[0], s, check), check)
     return None
+
+
+def dict_to_tuple(dict_list: List[Dict]) -> List[Tuple]:
+    return [(key, d['id'], d[key]) for d in dict_list for key in d if key != 'id']
+
+
+def tuples_to_dicts(tuples: Union[List, Tuple], use_facts=False, use_and_operator=False) -> List[Dict]:
+    dicts = defaultdict(dict)
+    for t in tuples:
+        if 'id' not in dicts[t[1]]:
+            dicts[t[1]]['id'] = t[1]
+        dicts[t[1]][t[0]] = t[2]
+    dicts = [d if not use_facts else Fact(**d) for d in dicts.values()]
+    if use_and_operator:
+        dicts = AND(*dicts)
+    return dicts
+
 
 def fact2tuple(facts, variables=False):
     if isinstance(facts, Fact):

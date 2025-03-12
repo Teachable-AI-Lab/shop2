@@ -5,16 +5,7 @@ from py_plan.unification import execute_functions
 from shop2.domain import Task
 
 
-def getT0(T: Union[List, Tuple]) -> Union[List, Tuple]:
-    """
-    Returns list/tuple of tasks which no other task in T is constrained to precede.
-    """
-    if isinstance(T, list) and not isinstance(T[0], (list, tuple)):
-        return list([T[0]])
-    elif isinstance(T, list):
-        return getT0(T[0])
-    elif isinstance(T, tuple):
-        return tuple(chain.from_iterable(getT0(t) if isinstance(t, (list, tuple)) else (t,) for t in T))
+
         
 def removeTask(T: Union[List, Tuple], task: Task) -> Union[List, Tuple]:
     """
